@@ -4,10 +4,10 @@ echo;
 echo 'Create a new SSH key for a remote server';
 echo '$ ./newKey.sh [username] [host] [key name] ?[key type] ?[email address]';
 echo;
-echo 'NOTE: Key types can be either "RSA" or "ed25519" or ecdsa'
+echo 'NOTE: Key types can be either "RSA" or "ed25519" or "ecdsa"'
 
 sshDir='/c/Users/[username]/.ssh/';
-# sshDir='/home/evan/.ssh/';
+# sshDir='/home/[username]/.ssh/';
 sshConf=$sshDir'config';
 
 userName="$1";

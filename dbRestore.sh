@@ -1,6 +1,7 @@
 #!/bin/sh
 
-
+root=$(pwd);
+newRoot=$root;
 user='root';
 password='password';
 badSrc=0;
@@ -9,21 +10,21 @@ revertSrc=0;
 source='';
 
 decompressedExists () {
-	tmpSrc="$1"
+	tmpSrc="$root/$1"
 
-	echo '14 - $tmpSrc: '$tmpSrc;
-	echo '15 - $source: '$source;
-	echo '16 - $deleteSrc: '$deleteSrc;
-	echo '17 - $badSrc: '$badSrc;
+	echo '15 - $tmpSrc: '$tmpSrc;
+	echo '16 - $source: '$source;
+	echo '17 - $deleteSrc: '$deleteSrc;
+	echo '18 - $badSrc: '$badSrc;
 
 	if [ -f "$tmpSrc" ]
 	then	source=$tmpSrc;
 		deleteSrc=1;
 	else	badSrc=1;
 	fi
-	echo '24 - $source: '$source;
-	echo '25 - $deleteSrc: '$deleteSrc;
-	echo '26 - $badSrc: '$badSrc;
+	echo '25 - $source: '$source;
+	echo '26 - $deleteSrc: '$deleteSrc;
+	echo '27 - $badSrc: '$badSrc;
 }
 
 decompressSQL () {
@@ -31,9 +32,9 @@ decompressSQL () {
 	ext=$(echo $src | sed 's/^\([^.]\+\.\)\+\(tar\.\)\?\(gz\|bz2\)\?$/\3/i')
 	isTar=$(echo $src | sed 's/^\([^.]\+\.\)\+\(\(tar\)\.\)\(gz\|bz2\)\?$/\3/i')
 	mode='-xzvf'
-	echo '34 - $src: '$src;
-	echo '35 - $ext: '$ext;
-	echo '36 - $isTar: '$isTar;
+	echo '35 - $src: '$src;
+	echo '36 - $ext: '$ext;
+	echo '37 - $isTar: '$isTar;
 
 	if [ "$isTar" == 'tar' ]
 	then	if [ "$ext" == 'bz2' ]
@@ -43,23 +44,24 @@ decompressSQL () {
 		echo
 		echo '--------------------------------------';
 		echo
-		echo '46 - Decompressing '$ext' file:'
+		echo '47 - Decompressing '$ext' file:'
 		echo '	'$src
-		echo 'tar '$mode' '$src;
+		echo '49 - tar '$mode' '$src;
 		tar $mode $src
 		ls -alh
 		newSrc=$(echo $src | sed 's/^\([^.]\+\(\.[^.]\+\)*\)\.tar\.'$ext'$/\1/');
 		ls -alh |grep $newSrc
 
-		echo '54 - $src: '$src;
-		echo '55 - $newSrc: '$newSrc;
+		echo '55 - $src: '$src;
+		echo '56 - $newSrc: '$newSrc;
 		echo
 		echo '--------------------------------------';
 		echo
 
-		echo '60 - $source: '$source;
+		echo '61 - $source: '$source;
+		echo '62 - $newSrc: '$newSrc;
 		decompressedExists $newSrc;
-		echo '62 - $source: '$source;
+		echo '64 - $source: '$source;
 		echo '--------------------------------------';
 		echo
 	else	if [ "$ext" == 'gz' ]
@@ -80,13 +82,17 @@ decompressSQL () {
 if [ ! -z "$1" ]
 then
 	if [ -f "$2" ]
-	then	source="$2";
+	then	
+		source="$root/$2";
+		newRoot=$(echo $source | sed 's/[^\/]\+$//');
+		fileOnly=$(echo $source | sed 's/\([^\/]\+\/\)\+\([^\/]\+\)$/\2/' | sed 's/\///');
 		oldSource="$source";
 		dbName="$1";
 		oldDbName="$dbName"
 
 		echo 'Sbout to try decompressing '$source;
-		decompressSQL $source;
+		cd $newRoot;
+		decompressSQL $fileOnly;
 		echo '$source: '$source;
 
 		# Check if we have a decompressed SQL file.
@@ -166,6 +172,7 @@ then
 				echo $(grep '^USE' $source | sed 's/^[^`]\+`\([^`]\+\)`.*$/\1/');
 			fi
 		fi
+		cd $root
 		exit;
 	fi
 fi

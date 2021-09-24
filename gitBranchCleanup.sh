@@ -14,7 +14,7 @@
 #    included in the replacement branch
 #
 # 2. Branches that have already been merged into a higher
-#    commitedInDays branchshould not be included in the
+#    commitedInDays branch should not be included in the
 #    replacement branch (toggled by $compareWithHigher)
 #
 # 3. Only branches that can be merged via fast-forward
