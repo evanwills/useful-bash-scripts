@@ -14,6 +14,11 @@
 #
 # See `$deployScriptPath` below for the location of the main script
 #
+# NOTE: There are times when you might want to deploy all eligible
+#       files regardless of when they were updated. You can do this
+#       by passing "all" as the second argument to this script in
+#       your current working directory
+#
 # Author:  Evan Wills <evan.wills@acu.edu.au>
 # Created: 2021-09-23 15:08
 # Updated: 2021-09-24 13:40
@@ -30,7 +35,7 @@
 #
 # @var string
 # ------------------------------------------------
-user='';
+sshUser='';
 
 # ------------------------------------------------
 # Host domain/IP for SCP destination Production
@@ -85,7 +90,22 @@ deployScriptPath='[[PATH]]/deployTo-main.sh';
 # ================================================
 # START: Call the script that does all the work
 
-/bin/sh $deployScriptPath "$1" "$user" "$prodHost" "$devHost" "$localHost" "$remotePath" "$srcList";
+env='dev';
+
+if [ ! -z "$1" ]
+then    tmp=$(echo $1 |grep -i 'prod\(uction\)\?');
+	if [ ! -z $tmp ]
+	then    env='prod';
+	else	tmp=$(echo $1 |grep -i 'local');
+		if [ ! -z $tmp ]
+		then    env='local';
+		fi
+	fi
+fi
+
+
+
+/bin/sh $deployScriptPath $env "$sshUser" "$prodHost" "$devHost" "$localHost" "$remotePath" "$srcList" "$2";
 
 #  END:  Call the script that does all the work
 # ================================================
