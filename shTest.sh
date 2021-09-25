@@ -30,5 +30,9 @@ echo;
 
 # Better evanh
 
-grep alias /c/Users/evwills/.bashrc | grep ';' | grep -v '^# \?alias' | sed 's/^alias \([a-z0-9]\+\)='"'\([^']\+\)';\?"'/\t\1  --  \2/ig' | sed 's/^#\(.\+\)/\n\n -------------------------------------\n\1\n/ig' | sed 's/;//g';
+thisDir="`dirname \"$0\"`"              # relative
+thisDirAbs="`( cd \"$MY_PATH\" && pwd )`"
 
+echo '$thisFile: '$thisDir
+echo '$thisFileAbs: '$thisDirAbs
+echo '$(pwd): '$(pwd)

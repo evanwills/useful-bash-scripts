@@ -18,6 +18,67 @@
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 
+
+# ================================================
+# START: Function declarations
+
+function modTime()
+{
+    modISO=$(stat "$1" | grep Modify | sed 's/^Modify: //')
+    echo $(date -d"$modISO" '+%s');
+}
+
+function makeSedSafe()
+{
+	echo $(echo $1 | sed 's/\([./]\)/\\\1/g')
+}
+
+
+#  END:  Function declarations
+# ================================================
+# START: Validate arguments
+
+# ------------------------------------------------
+# File system path to this script
+#
+# @var string
+# ------------------------------------------------
+thisDir="`( cd \"$MY_PATH\" && pwd )`";
+
+if [ -z "$1" ]
+then	echo 'You must specify which environment you want to deploy to';
+	exit;
+else	if [ "$1" == 'new' ]
+	then	if [ $(pwd) != $thisDir ]
+		then	conf=$(pwd)'/deployTo.sh';
+			cp $thisDir'/deployTo.tmpl.sh' $conf;
+			sed -i 's/\[\[PATH\]\]/'$(makeSedSafe $thisDir)'/i';
+		fi
+		exit;
+	fi
+
+	if [ -z "$2" ]
+	then	echo 'You must specify domain for the production server';
+		exit;
+	else	if [ -z "$3" ]
+		then	echo 'You must specify domain for the devleopment server';
+			exit;
+		else	if [ -z "$4" ]
+			then	echo 'You must specify domain for the local VM server';
+				exit;
+			else	if [ -z "$5" ]
+				then	echo 'You must specify the file system path to the application root';
+					exit
+				else	if [ -z "$6" ]
+					then	echo 'You must specify a list of files and/or directorys eligible for deployment';
+					fi
+				fi
+			fi
+		fi
+	fi
+fi
+
+#  END:  Validate arguments
 # ================================================
 # START: user maintained config
 
@@ -28,7 +89,7 @@
 #
 # @var string
 # ------------------------------------------------
-user='evwills';
+user="$2";
 
 # ------------------------------------------------
 # Host domain/IP for SCP destination Production
@@ -36,14 +97,7 @@ user='evwills';
 #
 # @var string
 # ------------------------------------------------
-hosttProd='ethicsfinderdb.acu.edu.au';
-
-# ------------------------------------------------
-# Human fiendly name for Production server
-#
-# @var string
-# ------------------------------------------------
-envProd='prod';
+hostProd="$3";
 
 # ------------------------------------------------
 # Host domain/IP for SCP destination Development
@@ -51,21 +105,22 @@ envProd='prod';
 #
 # @var string
 # -----------------------------------------------
-hostDev='fjnvduethics02.acu.edu.au';
+hostDev="$4";
 
 # ------------------------------------------------
-# Human fiendly name for Development server
+# Host domain/IP for SCP destination Development
+# server
 #
 # @var string
-# -------------------------------------------------
-envDev='dev';
+# -----------------------------------------------
+hostLocal="$5";
 
 # ------------------------------------------------
 # Remote filesystem path to application root
 #
 # @var string
 # -------------------------------------------------
-remotePath=':/var/www/html/db/'
+remotePath="$6"
 
 # ------------------------------------------------
 # List of files and directories that are elegible
@@ -73,11 +128,7 @@ remotePath=':/var/www/html/db/'
 #
 # @var string
 # ------------------------------------------------
-srcList='server.php README.md webpack.mix.js .editorconfig composer* package*';
-srcList=$srcList' app resources';
-srcList=$srcList' public/css public/js';
-# srcList=$srcList' publi';
-srcList=$srcList' routes config';
+srcList="$7";
 
 
 #  END:  user maintained config
@@ -100,25 +151,22 @@ dest=$hosttDev
 #
 # @var string
 # ------------------------------------------------
-env=$envDev
+env='Dev'
 
 
 if [ ! -z $1 ]
-then    tmp=$(echo $1 |grep 'prod\(uction\)\?');
+then    tmp=$(echo $1 |grep -i 'prod\(uction\)\?');
 	if [ ! -z $tmp ]
-	then    dest=$hosttProd;
-		env=$envProd;
+	then    dest=$hostProd;
+		env='Prod';
+	else	tmp=$(echo $1 |grep -i 'local');
+		if [ ! -z $tmp ]
+		then    dest=$hostLocal;
+			env='Local';
+		fi
 	fi
 fi
 
-
-# ------------------------------------------------
-# File name used to get the last deployment
-# timestamp
-#
-# @var string
-# ------------------------------------------------
-timeCheckFile='lastDeployment-'$env;
 
 
 # ------------------------------------------------
@@ -129,11 +177,13 @@ timeCheckFile='lastDeployment-'$env;
 # ------------------------------------------------
 dest=$user'@'$dest$remotePath;
 
-function modTime()
-{
-    modISO=$(stat "$1" | grep Modify | sed 's/^Modify: //')
-    echo $(date -d"$modISO" '+%s');
-}
+# ------------------------------------------------
+# File name used to get the last deployment
+# timestamp
+#
+# @var string
+# ------------------------------------------------
+timeCheckFile=$(pwd)'/lastDeployment-'$env;
 
 
 # ------------------------------------------------
@@ -149,7 +199,7 @@ lastDeployed=$(modTime $timeCheckFile);
 #
 # @var string
 # ------------------------------------------------
-sedDest=$(echo $dest | sed 's/\([./]\)/\\\1/g')
+sedDest=$(makeSedSafe $dest)
 
 # ------------------------------------------------
 # Regex safe representation path to current
@@ -157,7 +207,7 @@ sedDest=$(echo $dest | sed 's/\([./]\)/\\\1/g')
 #
 # @var string
 # ------------------------------------------------
-pwd=$(echo $(pwd) | sed 's/\([./]\)/\\\1/g')'\/'
+pwd=$(makeSedSafe $(pwd))'\/'
 
 
 # ------------------------------------------------
@@ -165,7 +215,7 @@ pwd=$(echo $(pwd) | sed 's/\([./]\)/\\\1/g')'\/'
 #
 # @var string
 # ------------------------------------------------
-updated=$(php -f deploy-getRecentlyUpdatedFiles.php "$srcList" $lastDeployed);
+updated=$(php -f deploy-getRecent.php "$srcList" $lastDeployed);
 
 
 
