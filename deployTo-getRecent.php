@@ -1,23 +1,25 @@
 <?php
 
 /**
- * This file is to be used by deployTo.sh to return a list of
- * recently updated files that should be uploaded to a server.
+ * This file is to be used by deployTo.sh to create a shell script
+ * with a custom list of files to be uploaded
  *
  * It is assumed that this script will be called by the shell script
  * deployTo.sh
  *
- * It expects two parameters:
+ * It expects three parameters:
  * 1. (srcList)   A space separated list of relative paths for files
  *                and directories that are eligible to be uploaded.
  * 2. (sinceTime) An integer representing the unix timestamp used to
  *                compare the modification time of each eligible.
  *                If the modification time is greater than the
  *                sinceTime they are included in the list
+ * 3. (host)      ssh username, host & path to application root used
+ *                to prefix the destination part of an SCP command
+ *                e.g. username@subdomain.host.com:/path/to/app/root
  *
- * The this script echos out a string representing a two dimensional
- * array. The first level is the destination path. The second level
- * is each eligible file for that path.
+ * The this script echos out a the file name of the custom shell
+ * script it has just generated so the calling script can execute it
  *
  * PHP version 7.4
  *
@@ -29,6 +31,7 @@
  */
 
 $debugPath =  realpath(__DIR__.'/../includes/debug.inc.php');
+
 if ($debugPath !== false && is_file($debugPath)) {
     include_once $debugPath;
 } else {
@@ -50,7 +53,7 @@ if (!array_key_exists('argv', $_SERVER)) {
         E_USER_ERROR
     );
 }
-if ($_SERVER['argc'] < 3) {
+if ($_SERVER['argc'] < 4) {
     trigger_error(
         __FILE__." expects at least two parameters to be passed: \n".
         "   srcList - a space separated list of eligible paths\n".
@@ -72,9 +75,11 @@ if ($_SERVER['argv'][1] === '') {
     $ok = false;
 }
 
-if (!is_numeric($_SERVER['argv'][2]) || $_SERVER['argv'][2] < time() - 31557600) {
+if (!is_numeric($_SERVER['argv'][2])
+    || ($_SERVER['argv'][2] > 0 && $_SERVER['argv'][2] < (time() - 31557600))
+) {
     trigger_error(
-        __FILE__." expects first parameter srcList to be a non \n".
+        __FILE__." expects second parameter sinceTime to be a non \n".
         "empty string",
         E_USER_WARNING
     );
@@ -82,6 +87,8 @@ if (!is_numeric($_SERVER['argv'][2]) || $_SERVER['argv'][2] < time() - 31557600)
 } else {
     $sinceTime = $_SERVER['argv'][2] * 1;
 }
+
+$host = $_SERVER['argv'][3];
 
 if ($ok === false) {
     echo "\n\nEnding now due to insufficient or unreliable supplied data\n\n";
@@ -190,6 +197,8 @@ for ($a = 0; $a < count($tmp); $a += 1) {
 
 $output = '';
 $sep1 = '';
+$groupC = 0;
+$fileC = 0;
 
 // Build a splittable string for use by the calling script
 foreach ($grouped as $key => $value) {
@@ -203,16 +212,44 @@ foreach ($grouped as $key => $value) {
                 trim($value[$a])
             );
             $sep2 = ' ';
+            $fileC += 1;
         }
-        $output .= $sep1."$srcList [[HOST]]$key;";
+        $output .= "$sep1 scp $srcList {$host}$key;";
         $sep1 = "\n";
+        $groupC += 1;
     }
 }
+
+$fileS = ($fileC > 1) ? 's' : '';
+$groupS = ($groupC > 1) ? 's' : '';
+$since = date('H:i:s D, \t\h\e jS \o\f M Y');
+
+/**
+ * Custom shell script content
+ *
+ * @var string
+ */
+$shell = '#!/bin/sh
+
+echo;
+echo;
+echo \'About to upload '.$fileC.' file'.$fileS.' in '.$groupC.' group'.$groupS.'\';
+echo \'that have been updated since '.$since.'\';
+echo;
+echo;
+[[OUTPUT]]
+echo;
+echo;
+';
+
 // debug($output);
 // echo "\n\n\n$output\n\n\n";
 if ($output !== '') {
-    $fileName = 'deployList__'.date('Y-m-d-H-i-s').'.txt';
-    file_put_contents($fileName, $output);
+    $fileName = 'deployList__'.date('Y-m-d-H-i-s').'.sh';
+    file_put_contents(
+        $fileName,
+        str_replace('[[OUTPUT]]', $output, $shell)
+    );
     echo $fileName;
 } else {
     echo '';

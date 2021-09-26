@@ -49,8 +49,11 @@
 # ------------------------------------------------
 function modTime()
 {
-    modISO=$(stat "$1" | grep Modify | sed 's/^Modify: //')
-    echo $(date -d"$modISO" '+%s');
+	if [ -f "$1" ]
+	then	modISO=$(stat "$1" | grep Modify | sed 's/^Modify: //')
+    		echo $(date -d"$modISO" '+%s');
+	else	echo 0;
+	fi
 }
 
 # ------------------------------------------------
@@ -65,6 +68,28 @@ function modTime()
 function sedSafe()
 {
 	echo $(echo $1 | sed 's/\([./]\)/\\\1/g')
+}
+
+# ------------------------------------------------
+# Report how many groups of files will be uploaded
+#
+# @param string $1 File containing a list of files
+#                  to be deployed
+#
+# @return void
+# ------------------------------------------------
+function reportOnUpload()
+{
+	c=$(grep -c "\n" $1)
+	s=''
+
+	if [ $c -gt 1 ]
+	then	s='s'
+	fi
+
+	echo;
+	echo "We have $c group$s of files to be uploaded";
+	echo;
 }
 
 
@@ -244,87 +269,47 @@ lastDeployed=0
 if [ $all -ne 1 ]
 then	# Only upload recently updated files
 	lastDeployed=$(modTime $timeCheckFile);
+
+	# if [ $lastDeployed -eq 0 ]
+	# then
+	# fi
 fi
-
-
-
-# ------------------------------------------------
-# Regex safe representation of the target server
-#
-# @var string
-# ------------------------------------------------
-sedDest=$(sedSafe $dest)
-
-# ------------------------------------------------
-# Regex safe representation path to current
-# workding directory
-#
-# @var string
-# ------------------------------------------------
-pwd=$(sedSafe $(pwd))'\/'
 
 
 #  END:  script initialised config
 # ==========================================================
 # START: Doin' tha do
 
+# echo "php -f $thisDir""deployTo-getRecent.php '$srcList' $lastDeployed";
 
 # ------------------------------------------------
-# File name for list of files to be deployed
+# Custom shell script with SCP commands for each
+# group of files to be uploded
 #
 # @var string
 # ------------------------------------------------
-updated=$(php -f $thisDir'/deployTo-getRecent.php' "$srcList" $lastDeployed);
+updated=$(php -f $thisDir'/deployTo-getRecent.php' "$srcList" $lastDeployed $dest);
+
 
 
 if [ ! -z "$updated" ]
 then    updated=$(pwd)'/'$updated;
-	echo;
-	echo 'We have '$(grep -c "\n" $updated)' groups of files to be uploaded';
-	echo;
-
 	if [ -f "$updated" ]
-	then	# Loop through all the files eligible for upload and
-		# SCP them up to the appropriate server
+	then	# Execute custom shell script that was created by PHP
+		/bin/sh $updated;
 
-		echo;
-		echo 'About push files up to '$env' ('$dest')'
-		echo;
-
-		while	read line
-		do	# echo '$pwd: '$pwd;
-
-			# Remove path to current working directory
-			# to make it easier to read which files are
-			# being uploaded
-			line=$(echo $line | sed 's/'$pwd'//ig')
-			# echo $line;
-
-			# Replace the keyword "[[HOST]]" with the the
-			# destination host string
-			line=$(echo $line | sed 's/\[\[HOST\]\]/'$sedDest'/')
-			# echo $line;
-
-			# Tell the user what's about to happen
-			echo;
-			echo '--------------------------------';
-			echo "scp $line";
-			echo;
-
-			# run the actual SCP command for this group
-			# of files
-			scp $line;
-			echo;
-			echo '--------------------------------';
-		done < $updated
-
-		# Delete upload list now that it's no longer useful
+		# Delete upload custom shell script now that it's no
+		# longer useful
 		rm $updated;
 
 		# Record when this deployment completed
 		touch $timeCheckFile;
 	fi
-else	echo 'No files were eligible for uploading';
+else	echo;
+	echo;
+	echo 'No files were eligible for uploading';
+	echo;
+	echo;
 fi
 
 
