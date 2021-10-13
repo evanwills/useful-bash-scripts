@@ -3,13 +3,13 @@
     {
       "name": "prod",
       "host": "",
-      "user": "evwills",
+      "user": "username",
       "path": "/var/www/html/"
     },
     {
       "name": "dev",
       "host": "",
-      "user": "evwills",
+      "user": "username",
       "path": "/var/www/html/"
     }
   ],
