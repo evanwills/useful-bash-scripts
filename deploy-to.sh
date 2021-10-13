@@ -121,11 +121,12 @@ then	# Make sure the new script is executable
 	rm $scriptName;
 else	echo;
 	echo;
-	echo 'No files were eligible for uploading';
+	echo 'No files were eligible for uploading at this time';
 	echo;
 	echo;
 fi
 
+echo '$scriptName: '$scriptName;
 
 #  END:  Doin' tha do
 # ==========================================================
