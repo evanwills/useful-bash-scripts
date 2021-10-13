@@ -1,0 +1,24 @@
+{
+  "servers": [
+    {
+      "name": "prod",
+      "host": "",
+      "user": "evwills",
+      "path": "/var/www/html/"
+    },
+    {
+      "name": "dev",
+      "host": "",
+      "user": "evwills",
+      "path": "/var/www/html/"
+    }
+  ],
+  "sourceList": [
+
+  ],
+  "exclude": {
+    "extensions": [],
+    "paths": [],
+    "parts": []
+  }
+}

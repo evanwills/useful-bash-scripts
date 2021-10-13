@@ -55,11 +55,14 @@ if (!array_key_exists('argv', $_SERVER)) {
 }
 if ($_SERVER['argc'] < 4) {
     trigger_error(
-        __FILE__." expects at least two parameters to be passed: \n".
-        "   srcList - a space separated list of eligible paths\n".
+        __FILE__." expects at least three parameters to be passed: \n".
+        "   srcList   - a space separated list of eligible paths\n".
         "and\n".
-        "   sinceTime - a unix timestame after which modified ".
-        "files are eligible for upload",
+        "   sinceTime - a unix timestame after which modified files\n".
+        "               are eligible for upload\n".
+        "and\n".
+        "   host      - username, host and path to be used in SCP call\n".
+        "               e.g. josmith@example.com:/var/www/html/",
         E_USER_ERROR
     );
 }
