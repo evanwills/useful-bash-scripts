@@ -1,25 +1,25 @@
 <?php
 
 /**
- * This file is to be used by deployTo.sh to create a shell script
+ * This file is to be used by deploy-to.sh to create a bash script
  * with a custom list of files to be uploaded
  *
  * It is assumed that this script will be called by the shell script
- * deployTo.sh
+ * deploy-to.sh
  *
- * It expects three parameters:
- * 1. (srcList)   A space separated list of relative paths for files
- *                and directories that are eligible to be uploaded.
- * 2. (sinceTime) An integer representing the unix timestamp used to
- *                compare the modification time of each eligible.
- *                If the modification time is greater than the
- *                sinceTime they are included in the list
- * 3. (host)      ssh username, host & path to application root used
- *                to prefix the destination part of an SCP command
- *                e.g. username@subdomain.host.com:/path/to/app/root
+ * It expects two or three parameters:
+ * 1. (environment) A string that matches one of the "name"s of
+ *                  servers listed in deploy-to.json in the current
+ *                  working directory
+ * 2. (scriptName)  The name of the file the output of this script
+ *                  will be written to
+ * 3. (force)       [optional] Whether or not to force deploying all
+ *                  files regardless of when they were updated
  *
- * The this script echos out a the file name of the custom shell
- * script it has just generated so the calling script can execute it
+ * It depends on the presence of deploy-to.json in the current
+ * working directory to provide the necessary config to be able to
+ * select which files are to be deployed to the appropriate server.
+ * (see deploy-to.json in this directory for template)
  *
  * PHP version 7.4
  *
@@ -27,7 +27,7 @@
  * @package  Qist
  * @author   Evan Wills <evan.wills@acu.edu.au>
  * @license  MIT https://opensource.org/licenses/MIT
- * @link     https://gitlab.acu.edu.au/evwills/acu-payment-forms
+ * @link     https://github.com/evanwills/useful-bash-scripts
  */
 
 
@@ -154,9 +154,9 @@ $server = false;
 $_SERVER['argv'][1] = trim($_SERVER['argv'][1]);
 if ($_SERVER['argv'][1] === '') {
     trigger_error(
-        __FILE__." expects first parameter srcList to be a non \n".
-        'empty string',
-        E_USER_WARNING
+        __FILE__." expects first parameter 'environment' to be a\n".
+        'non-empty string',
+        E_USER_ERROR
     );
 } else {
     for ($a = 0; $a < count($data->servers); $a += 1) {
@@ -170,7 +170,7 @@ if ($_SERVER['argv'][1] === '') {
         if (!is_object($tmp)) {
             trigger_error(
                 'Every item in the Servers list must be an object. Item '.
-                ($a + 1).' is '.gettype(),
+                ($a + 1).' is '.gettype($tmp),
                 E_USER_WARNING
             );
         }
@@ -185,7 +185,7 @@ if ($_SERVER['argv'][1] === '') {
                 'containing the following properties: '.
                 '"name", "host", "user", "path"'.
                 ($a + 1).' is '.gettype($tmp),
-                E_USER_WARNING
+                E_USER_ERROR
             );
         }
 
@@ -201,7 +201,7 @@ if ($server === false) {
     trigger_error(
         'Could not find any information about the server we should '.
         'push to',
-        E_USER_WARNING
+        E_USER_ERROR
     );
 }
 
@@ -230,7 +230,7 @@ if (is_string($_SERVER['argv'][2])
         __FILE__." expects the second argument to be a string \n".
         "for the file name for the shell script to\n".
         "do the actual work of uploading files.",
-        E_USER_WARNING
+        E_USER_ERROR
     );
 }
 
@@ -264,12 +264,19 @@ if (array_key_exists(3, $_SERVER['argv']) && $_SERVER['argv'][3] === 'force') {
 }
 
 /**
+ * Basic SCP user/host identifier
+ *
+ * @var string
+ */
+define('HOST', $server->user.'@'.$server->host.':');
+
+/**
  * SCP Username, host and root path for application files are
  * being uploaded to
  *
  * @var string
  */
-$host = $server->user.'@'.$server->host.':'.$server->path;
+$host = HOST.$server->path;
 
 
 /**
@@ -279,6 +286,13 @@ $host = $server->user.'@'.$server->host.':'.$server->path;
  * @var string
  */
 define('FANCY_DATE', 'H:i:s \o\n l, \t\h\e jS \o\f F Y');
+
+/**
+ * Absolute path to template bash script
+ *
+ * @var string
+ */
+define('TMPL', __DIR__.DIRECTORY_SEPARATOR.'deploy-to.tmpl.sh');
 
 //  END:  Initial setup & validation
 // ===================================================================
@@ -374,12 +388,11 @@ function getDeployable(string $path, int $last) : array
  */
 function populateScript(array $data) : string
 {
-    $_tmpl = __DIR__.DIRECTORY_SEPARATOR.'deploy-to.tmpl.sh';
-    $tmpl = realpath($_tmpl);
+    $tmpl = realpath(TMPL);
 
     if (!is_file($tmpl)) {
         trigger_error(
-            'Could not find bash script template file at "'.$_tmpl.'"',
+            'Could not find bash script template file at "'.TMPL.'"',
             E_USER_ERROR
         );
     }
@@ -450,7 +463,7 @@ $groupC = 0;
  */
 $fileC = 0;
 
-// Build a splittable string for use by the calling script
+// Build a list of calls to SCP
 foreach ($grouped as $path => $source) {
     if (count($source) > 0) {
         /**
