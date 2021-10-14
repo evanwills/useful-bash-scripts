@@ -45,6 +45,13 @@
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
 
+
+
+# ==========================================================
+# START: Setting up config
+
+
+
 # ------------------------------------------------
 # Name of the deployment target
 #
@@ -83,8 +90,14 @@ thisDir=$(realpath "$0" | sed "s/[^/']\+$//");
 # ------------------------------------------------
 scriptName='deployList__'$(date +'%Y-%m-%d--%H-%M-%S')'.sh';
 
+
+
+
+#  END:  Setting up config
 # ==========================================================
 # START: Doin' tha do
+
+
 
 if [ $env == 'new' ]
 then	file='deploy-to.json';
@@ -113,6 +126,7 @@ then	# Make sure the new script is executable
 
 	# Execute custom shell script that was created by PHP
 	/bin/sh $scriptName;
+
 	# echo; echo;
 	# tail -n 80 $scriptName;
 
@@ -126,7 +140,11 @@ else	echo;
 	echo;
 fi
 
-echo '$scriptName: '$scriptName;
+
+
 
 #  END:  Doin' tha do
 # ==========================================================
+
+
+# echo '$scriptName: '$scriptName;
