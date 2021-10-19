@@ -35,7 +35,12 @@ fi
 # -----------------------------------------------
 remotes=$(git remote -v | grep -c push);
 
-echo 'About to push to '$remotes' repositories';
+if [ $remotes -gt 1 ]
+then	s='ies';
+else	s='y';
+fi
+
+echo 'About to push to '$remotes' repositor'$s;
 echo;
 echo;
 
