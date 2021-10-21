@@ -57,7 +57,7 @@
 #
 # @var string
 # ------------------------------------------------
-env='dev';
+env='';
 
 # ------------------------------------------------
 # Whether or not to force uploading all files,
@@ -68,9 +68,14 @@ env='dev';
 force="$2";
 
 if [ ! -z "$1" ]
-then	if [ $1 != 'force' ]
-	then	env="$1";
-	else	force='force';
+then	if [ $1 == 'force' ]
+	then	env='';
+		force='force';
+
+		if [ ! -z "$2" ]
+		then	env="$2";
+		fi
+	else	env="$1"
 	fi
 fi
 
@@ -97,9 +102,7 @@ scriptName='deployList__'$(date +'%Y-%m-%d--%H-%M-%S')'.sh';
 # ==========================================================
 # START: Doin' tha do
 
-
-
-if [ $env == 'new' ]
+if [ "$env" == 'new' ]
 then	file='deploy-to.json';
 	if [ ! -f "$(pwd)/deploy-to.json" ]
 	then	cp $thisDir$file $(pwd)'/';
@@ -114,7 +117,7 @@ fi
 # Generate the shell script with SCP commands for
 # each group of files to be uploded
 
-php -f $thisDir'deploy-to.php' "$env" "$scriptName" $force;
+php -f $thisDir'deploy-to.php' "$scriptName" "$env" "$force";
 
 scriptName="$(pwd)/$scriptName";
 
@@ -132,7 +135,7 @@ then	# Make sure the new script is executable
 
 	# Delete upload custom shell script now that it's no
 	# longer useful
-	rm $scriptName;
+	# rm $scriptName;
 else	echo;
 	echo;
 	echo 'No files were eligible for uploading at this time';

@@ -52,16 +52,7 @@ if ($debugPath !== false && is_file($debugPath)) {
     }
 }
 
-define(
-    'PWD',
-    realpath(
-        str_replace(
-            array('/c', '/'),
-            array('C:', '\\'),
-            $_SERVER['PWD']
-        )
-    ).DIRECTORY_SEPARATOR
-);
+define('PWD', realpath($_SERVER['PWD']).DIRECTORY_SEPARATOR);
 
 
 //  END:  Boot-strapping
@@ -100,14 +91,30 @@ if (!is_file($json)) {
         );
     }
 
-    if (!is_array($data->servers) || count($data->servers) === 0) {
+    if (!property_exists($data, 'default')
+        || !is_string($data->default)
+        || trim($data->default) === ''
+    ) {
+        trigger_error(
+            $json.' does not contain the name of a default server',
+            E_USER_ERROR
+        );
+    }
+
+    if (!property_exists($data, 'servers')
+        || !is_array($data->servers)
+        || count($data->servers) === 0
+    ) {
         trigger_error(
             $json.' does not contain any server details',
             E_USER_ERROR
         );
     }
 
-    if (!is_array($data->sourceList) || count($data->sourceList) === 0) {
+    if (!property_exists($data, 'sourceList')
+        || !is_array($data->sourceList)
+        || count($data->sourceList) === 0
+    ) {
         trigger_error(
             $json.' does not contain any files to deploy',
             E_USER_ERROR
@@ -122,15 +129,11 @@ if (!array_key_exists('argv', $_SERVER)) {
         E_USER_ERROR
     );
 }
-if ($_SERVER['argc'] < 3) {
+if ($_SERVER['argc'] < 2) {
     trigger_error(
-        __FILE__." expects at least two parameters to be passed: \n".
-        "environment name - \"name\" property of one of the servers listed\n".
-        "                   in the \"servers\" list in the deploy-to.json \n".
-        "and\n".
+        __FILE__." expects at least one parameter to be passed: \n".
         "       file name - The name of the output script file if items are\n".
         "                   found to deploy\n\n".
-        "files are eligible for upload",
         E_USER_ERROR
     );
 }
@@ -151,49 +154,57 @@ $ok = false;
  */
 $server = false;
 
-$_SERVER['argv'][1] = trim($_SERVER['argv'][1]);
-if ($_SERVER['argv'][1] === '') {
-    trigger_error(
-        __FILE__." expects first parameter 'environment' to be a\n".
-        'non-empty string',
-        E_USER_ERROR
-    );
-} else {
-    for ($a = 0; $a < count($data->servers); $a += 1) {
-        /**
-         * Details about one of the deployment targets for the
-         * current context
-         *
-         * @var object
-         */
-        $tmp = $data->servers[$a];
-        if (!is_object($tmp)) {
-            trigger_error(
-                'Every item in the Servers list must be an object. Item '.
-                ($a + 1).' is '.gettype($tmp),
-                E_USER_WARNING
-            );
-        }
 
-        if (!property_exists($tmp, 'name')
-            || !property_exists($tmp, 'host')
-            || !property_exists($tmp, 'user')
-            || !property_exists($tmp, 'path')
-        ) {
-            trigger_error(
-                'Every item Servers must be an object '.
-                'containing the following properties: '.
-                '"name", "host", "user", "path"'.
-                ($a + 1).' is '.gettype($tmp),
-                E_USER_ERROR
-            );
-        }
+/**
+ * Object containing basic information about the default server
+ * to deploy to
+ *
+ * @var object|false (FALSE if no default server was found)
+ */
+$defaultServer = false;
 
-        if ($tmp->name === $_SERVER['argv'][1]) {
-            $server = $tmp;
-            $ok = true;
-            break;
-        }
+$tmpEnv = (array_key_exists(2, $_SERVER['argv']) && trim($_SERVER['argv'][2]) !== '')
+    ? trim($_SERVER['argv'][2])
+    : '[[DEFAULT]]'; // "[[default]]" should not match any server name
+for ($a = 0; $a < count($data->servers); $a += 1) {
+    /**
+     * Details about one of the deployment targets for the
+     * current context
+     *
+     * @var object
+     */
+    $tmp = $data->servers[$a];
+
+    if (!is_object($tmp)) {
+        trigger_error(
+            'Every item in the Servers list must be an object. Item '.
+            ($a + 1).' is '.gettype($tmp),
+            E_USER_ERROR
+        );
+    }
+
+    if (!property_exists($tmp, 'name')
+        || !property_exists($tmp, 'host')
+        || !property_exists($tmp, 'user')
+        || !property_exists($tmp, 'path')
+    ) {
+        trigger_error(
+            'Every item Servers must be an object '.
+            'containing the following properties: '.
+            '"name", "host", "user", "path"'.
+            ($a + 1).' is '.gettype($tmp),
+            E_USER_ERROR
+        );
+    }
+
+    if ($tmp->name === $tmpEnv) {
+        $server = $tmp;
+        $ok = true;
+        break;
+    } elseif ($tmp->name === $data->default && $server === false) {
+        // We'll set the default server as the selected server
+        // but keep checking in case we can match a specific server
+        $server = $tmp;
     }
 }
 
@@ -213,9 +224,9 @@ if ($server === false) {
  */
 $regex = '/^deployList__20(?:\d{2}-){3}(?:-\d{2}){3}\.sh$/i';
 
-$_SERVER['argv'][2] = trim($_SERVER['argv'][2]);
-if (is_string($_SERVER['argv'][2])
-    && preg_match($regex, $_SERVER['argv'][2])
+$_SERVER['argv'][1] = trim($_SERVER['argv'][1]);
+if (is_string($_SERVER['argv'][1])
+    && preg_match($regex, $_SERVER['argv'][1])
 ) {
     /**
      * Absolute path to where the bash script generated by this
@@ -223,7 +234,7 @@ if (is_string($_SERVER['argv'][2])
      *
      * @var string
      */
-    $fileName = PWD.$_SERVER['argv'][2];
+    $fileName = PWD.$_SERVER['argv'][1];
     $ok = true;
 } else {
     trigger_error(
@@ -424,7 +435,7 @@ $tmp = array();
 for ($a = 0; $a < count($data->sourceList); $a += 1) {
     $tmp = array_merge(
         $tmp,
-        getDeployable(PWD.$data->sourceList[$a], $sinceTime)
+        getDeployable($data->sourceList[$a], $sinceTime)
     );
 }
 // debug($tmp);
