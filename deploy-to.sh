@@ -123,6 +123,9 @@ scriptName="$(pwd)/$scriptName";
 
 # ------------------------------------------------
 
+echo;
+echo 'Started: '$(date +'%Y-%m-%d %H:%M:%S');
+
 if [ -f "$scriptName" ]
 then	# Make sure the new script is executable
 	chmod u+x $scriptName;
@@ -135,7 +138,10 @@ then	# Make sure the new script is executable
 
 	# Delete upload custom shell script now that it's no
 	# longer useful
-	# rm $scriptName;
+	rm $scriptName;
+
+
+	echo 'Completed: '$(date +'%Y-%m-%d %H:%M:%S');
 else	echo;
 	echo;
 	echo 'No files were eligible for uploading at this time';

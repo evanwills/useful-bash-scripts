@@ -120,6 +120,11 @@ if (!is_file($json)) {
             E_USER_ERROR
         );
     }
+    if (!property_exists($data, 'sleep') || !is_int($data->sleep * 1)) {
+        $sleepDuration = 0;
+    } else {
+        $sleepDuration = $data->sleep;
+    }
 }
 
 if (!array_key_exists('argv', $_SERVER)) {
@@ -443,8 +448,10 @@ for ($a = 0; $a < count($data->sourceList); $a += 1) {
 
 $grouped = array();
 
+$totalFiles = count($tmp);
+
 // Group files by their destination path (speeds up SCP calls)
-for ($a = 0; $a < count($tmp); $a += 1) {
+for ($a = 0; $a < $totalFiles; $a += 1) {
     $key = trim($tmp[$a]['remote']);
     $value = $tmp[$a]['local'];
     if (!array_key_exists($key, $grouped)) {
@@ -474,7 +481,21 @@ $groupC = 0;
  */
 $fileC = 0;
 
+if ($totalFiles > 100 && $sleepDuration > 0) {
+    $makeSlepp = function ($b) {
+        return ($b > 100);
+    };
+    $secs = ($sleepDuration > 1)
+        ? 's'
+        : '';
+} else {
+    $makeSlepp = function ($b) {
+        return false;
+    };
+}
+
 // Build a list of calls to SCP
+$b = 0;
 foreach ($grouped as $path => $source) {
     if (count($source) > 0) {
         /**
@@ -485,12 +506,30 @@ foreach ($grouped as $path => $source) {
          */
         $srcList = '';
 
+        $c = 0;
         for ($a = 0; $a < count($source); $a += 1) {
             $srcList .= ' '.unixPath($source[$a]);
             $fileC += 1;
+            $b += 1;
+            if ($c > 10) {
+                $c = 0;
+                $output .= "\nscp$srcList {$host}$path;";
+                $srcList = '';
+            }
+            $c += 1;
         }
 
-        $output .= "\nscp$srcList {$host}$path;";
+        if ($makeSlepp($b)) {
+            $b = 0;
+            $output .= "\n\necho;\n".
+                       "\necho 'Pausing for $sleepDuration ".
+                       "second$secs to prevent timeouts';".
+                       "\necho; echo;\nsleep $sleepDuration;\n\n";
+        }
+
+        if ($srcList !== '') {
+            $output .= "\nscp$srcList {$host}$path;";
+        }
         $groupC += 1;
     }
 }

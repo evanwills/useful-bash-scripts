@@ -22,8 +22,8 @@ fi
 echo '$pwd: '$pwd
 if [[ $pwd == *"c/Users/evwills/Documents/Evan/code"* ]]
 then	evan=1;
-	stashPath='/c/Users/evwills/Documents/Evan/code/remote-stash/';
-else	stashPath='/c/Users/evwills/Documents/ACU/remote-stash/';
+	stashPath=$HOME'/Documents/Evan/code/remote-stash/';
+else	stashPath=$HOME'/Documents/ACU/remote-stash/';
 fi
 
 echo '$evan: '$evan

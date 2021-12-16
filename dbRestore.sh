@@ -82,7 +82,7 @@ decompressSQL () {
 if [ ! -z "$1" ]
 then
 	if [ -f "$2" ]
-	then	
+	then
 		source="$root/$2";
 		newRoot=$(echo $source | sed 's/[^\/]\+$//');
 		fileOnly=$(echo $source | sed 's/\([^\/]\+\/\)\+\([^\/]\+\)$/\2/' | sed 's/\///');
@@ -143,10 +143,13 @@ then
 		echo
 		echo '======================================';
 		echo
-		echo 'mysql -v -p -u '$user $dbName' < '$source;
+		# echo 'mariadb -v -p -u '$user $dbName' < '$source;
+		echo 'winpty mariadb -v -p -u '$user $dbName' < '$source;
 		if [ -z "$password" ]
-		then	mysql -v -p -u $user $dbName < $source
-		else	mysql -v -password=$password -u $user $dbName < $source
+		then	# mariadb -v -p -u $user $dbName < $source
+			winpty mariadb -v -p -u $user $dbName < $source
+		else	# mariadb -v -password=$password -u $user $dbName < $source
+			winpty mariadb -v -password=$password -u $user $dbName < $source
 		fi
 		echo
 		echo '======================================';
