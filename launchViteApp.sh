@@ -4,7 +4,9 @@ appName="$1"
 
 repo=$(echo $appName | sed 's/\([A-Z]\)/-\1/g')
 repo=${repo,,}
-repo="$HOME/Documents/Evan/code/$repo/"
+repo=$HOME'/Documents/Evan/code/'$repo'/';
+
+thisDir=$(realpath "$0" | sed "s/[^/']\+$//");
 
 if [ ! -d $repo ]
 then	echo 'Could not find repo for '$appName
@@ -14,7 +16,8 @@ fi
 
 lockFile=$HOME'/'$appName'.lock';
 
-launchThis="/bin/sh $HOME/launchViteApp.sh $appName;";
+launchThis="/bin/sh $thisDir/launchViteApp.sh $appName;";
+# echo '$thisDir: "'$thisDir'"';
 
 if [ ! -f $lockFile ]
 then	touch $lockFile
@@ -27,7 +30,7 @@ then	touch $lockFile
 	echo "(NOTE: I've set $lockFile to prevent duplicate servers being started for this application.)";
 	echo;
 
-	npm run dev
+	/c/Program\ Files/nodejs/npm run dev
 
 	echo;
 
