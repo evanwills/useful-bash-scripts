@@ -362,7 +362,6 @@ function getDeployable(string $path, int $last) : array
 {
     $real = realpath($path);
     $output = array();
-    // debug($path, $last, $real);
 
     if (is_file($real)) {
         if (filemtime($real) > $last) {
@@ -379,9 +378,8 @@ function getDeployable(string $path, int $last) : array
         }
     } elseif (is_dir($real)) {
         $children = scandir($real);
-        // debug($path, $real, $children);
+
         for ($a = 0; $a < count($children); $a += 1) {
-            // debug($path.$children[$a]);
             if ($children[$a] !== '..' && $children[$a] !== '.') {
                 $output = array_merge(
                     $output,
@@ -389,7 +387,31 @@ function getDeployable(string $path, int $last) : array
                 );
             }
         }
+    } elseif (preg_match('/\*\.[a-z]+$/i', $path)) {
+        // Get wildcard files by file extension
+
+        $ext = preg_replace('/^[^*]*\*/', '', $path);
+        $oldPath = realpath(str_replace('*'.$ext, '', $path)).DIRECTORY_SEPARATOR;
+        $oldPath = ($oldPath === '*')
+            ? PWD
+            : $oldPath;
+        $l = strlen($ext) * -1;
+
+        $children = scandir($oldPath);
+
+        for ($a = 0; $a < count($children); $a += 1) {
+            if (substr($children[$a], $l) === $ext) {
+                $output = array_merge(
+                    $output,
+                    getDeployable(
+                        "$oldPath{$children[$a]}",
+                        $last
+                    )
+                );
+            }
+        }
     }
+
     return $output;
 }
 
@@ -443,7 +465,6 @@ for ($a = 0; $a < count($data->sourceList); $a += 1) {
         getDeployable($data->sourceList[$a], $sinceTime)
     );
 }
-// debug($tmp);
 
 
 $grouped = array();
