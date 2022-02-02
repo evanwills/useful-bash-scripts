@@ -23,8 +23,8 @@
  *
  * PHP version 7.4
  *
- * @category Qist
- * @package  Qist
+ * @category Scripts
+ * @package  Scripts
  * @author   Evan Wills <evan.wills@acu.edu.au>
  * @license  MIT https://opensource.org/licenses/MIT
  * @link     https://github.com/evanwills/useful-bash-scripts
