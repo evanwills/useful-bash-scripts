@@ -391,13 +391,23 @@ function getDeployable(string $path, int $last) : array
         // Get wildcard files by file extension
 
         $ext = preg_replace('/^[^*]*\*/', '', $path);
-        $oldPath = realpath(str_replace('*'.$ext, '', $path)).DIRECTORY_SEPARATOR;
-        $oldPath = ($oldPath === '*')
-            ? PWD
-            : $oldPath;
         $l = strlen($ext) * -1;
 
+        $isRoot = false;
+
+        // strip the wildcard pattern from the path
+        $oldPath = preg_replace('`(?<=/)[^/]+$`', '', $path);
+        if (preg_match('/^\*\.[a-z]+$/i', $path)) {
+            // wildcard pattern is for root so just
+            $oldPath = PWD;
+            $isRoot = true;
+        }
+
         $children = scandir($oldPath);
+
+        $oldPath = ($isRoot === true)
+            ? ''
+            : $oldPath;
 
         for ($a = 0; $a < count($children); $a += 1) {
             if (substr($children[$a], $l) === $ext) {
@@ -503,14 +513,14 @@ $groupC = 0;
 $fileC = 0;
 
 if ($totalFiles > 100 && $sleepDuration > 0) {
-    $makeSlepp = function ($b) {
+    $makeSleep = function ($b) {
         return ($b > 100);
     };
     $secs = ($sleepDuration > 1)
         ? 's'
         : '';
 } else {
-    $makeSlepp = function ($b) {
+    $makeSleep = function ($b) {
         return false;
     };
 }
@@ -526,21 +536,25 @@ foreach ($grouped as $path => $source) {
          * @var string
          */
         $srcList = '';
+        $sep = ' ';
 
         $c = 0;
         for ($a = 0; $a < count($source); $a += 1) {
-            $srcList .= ' '.unixPath($source[$a]);
+            $srcList .= $sep.unixPath($source[$a]);
             $fileC += 1;
             $b += 1;
             if ($c > 10) {
                 $c = 0;
-                $output .= "\nscp$srcList {$host}$path;";
+                $output .= "\nscp$srcList \\\n{$host}$path;\n";
                 $srcList = '';
+                $sep = ' ';
+            } else {
+                $sep = " \\\n    ";
             }
             $c += 1;
         }
 
-        if ($makeSlepp($b)) {
+        if ($makeSleep($b)) {
             $b = 0;
             $output .= "\n\necho;\n".
                        "\necho 'Pausing for $sleepDuration ".
@@ -549,7 +563,7 @@ foreach ($grouped as $path => $source) {
         }
 
         if ($srcList !== '') {
-            $output .= "\nscp$srcList {$host}$path;";
+            $output .= "\nscp$srcList \\\n{$host}$path;\n";
         }
         $groupC += 1;
     }
