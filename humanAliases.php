@@ -397,7 +397,13 @@ if (preg_match_all(FIND_BLOCKS, $content, $blocks, PREG_SET_ORDER)) {
                     renderAliases($aliases);
     }
 } else {
-    $output = renderAliases($aliases);
+    $block = aliasToArray($content);
+
+    if (count($block) > 0) {
+        echo "\n\n";
+        $output = renderAliases($block);
+        echo "\n\n";
+    }
 }
 
 // Render the output
