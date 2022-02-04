@@ -29,8 +29,7 @@ from any directory with a `deploy-to.json` config file
 set up for each environment. Otherwise you will have to enter you 
 password many times, which is tedious.
 
-This file is used to upload recently updated files to a given
-server based a data in the working directory's deploy-to.json
+## Arguments
 
 The script expects up to two arguments.
 

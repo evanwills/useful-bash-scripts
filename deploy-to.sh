@@ -100,14 +100,44 @@ scriptName='deployList__'$(date +'%Y-%m-%d--%H-%M-%S')'.sh';
 
 #  END:  Setting up config
 # ==========================================================
-# START: Doin' tha do
+# START: Functions
 
-if [ "$env" == 'new' ]
-then	file='deploy-to.json';
-	if [ ! -f "$(pwd)/deploy-to.json" ]
-	then	cp $thisDir$file $(pwd)'/';
+
+
+
+# ------------------------------------------------
+# Copy a blank deploy-to.json file to the current
+# working directory
+# ------------------------------------------------
+doInit () {
+	_file='deploy-to.json';
+	if [ ! -f "$(pwd)/$_file" ]
+	then	echo;
+		echo;
+		echo 'Creating a new "'$_file'" file in the current ';
+		echo 'working directory:';
+		echo '    '$(pwd);
+		echo;
+		cp $thisDir$_file $(pwd)'/';
 		exit;
 	fi;
+}
+
+
+
+
+#  END:  Functions
+# ==========================================================
+# START: Doin' tha do
+
+
+
+
+if [ "$env" == 'new' ]
+then	doInit
+else	if [ "$env" == 'init' ]
+	then	doInit
+	fi
 fi
 
 

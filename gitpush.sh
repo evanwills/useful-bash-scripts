@@ -13,16 +13,14 @@
 # first 9 parameters will be concatinated to form a single
 # string which will be used as the commit message.
 #
-# This script was created because I was working late one
-# night and committed my changes but forgot to push them
-# up to the server because I was tired. The next day my
-# laptop's drive died and I lost all the work I'd done the
-# day before. I now use it all the time so that when I'm
-# collaborating with colleagues, I know that my changes are
-# always up on the repo.
+# This script was created because, even though I was
+# commiting changes on a regular basis, I kept forgetting
+# to push my changes up the the server and my colleagues
+# kept asking me to do so.
 #
-# created: 2021-10-20
-# by:      Evan Wills <evan.i.wills@gmail.com>
+# Author:  Evan Wills <evan.i.wills@gmail.com>
+# Created: 2021-10-20
+# Updated: 2022-02-04
 # ---------------------------------------------------------
 
 
