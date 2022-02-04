@@ -1,11 +1,28 @@
 #!/bin/sh
 
 # ---------------------------------------------------------
-# This file is a temporary bash script for uploading files
-# to [[HOST]] ([[SERVER_NAME]])
+# This script pushes the current branch up to all remote
+# repositories this instance of the ropo knows about.
 #
-# created: [[CREATED]]
-# by:      [[USER]]
+# If only one parameter is passed to the script, the script
+# will execute a commit using the passed string as the
+# message, before pushing the repo up to the remote
+# servers.
+# If more than one parameter is passed, it is assumed the
+# user forgot to wrap their commit message in quotes. The
+# first 9 parameters will be concatinated to form a single
+# string which will be used as the commit message.
+#
+# This script was created because I was working late one
+# night and committed my changes but forgot to push them
+# up to the server because I was tired. The next day my
+# laptop's drive died and I lost all the work I'd done the
+# day before. I now use it all the time so that when I'm
+# collaborating with colleagues, I know that my changes are
+# always up on the repo.
+#
+# created: 2021-10-20
+# by:      Evan Wills <evan.i.wills@gmail.com>
 # ---------------------------------------------------------
 
 
@@ -44,14 +61,51 @@ echo 'About to push to '$remotes' repositor'$s;
 echo;
 echo;
 
-msg=$(echo $1 | sed 's/[\t ]\+//g');
+if [ ! -z "$2" ]
+then	# Someone's a bozo and forgot to wrap
+	# their comments in quotes.
+	# Let's put it together for them.
+	msg="$1 $2";
+
+	if [ ! -z "$3" ]
+	then	msg="$msg $3";
+
+		if [ ! -z "$4" ]
+		then	msg="$msg $4";
+
+			if [ ! -z "$5" ]
+			then	msg="$msg $5";
+
+				if [ ! -z "$6" ]
+				then	msg="$msg $6";
+
+					if [ ! -z "$7" ]
+					then	msg="$msg $7";
+
+						if [ ! -z "$8" ]
+						then	msg="$msg $8";
+
+							if [ ! -z "$9" ]
+							then	msg="$msg $9";
+							fi
+						fi
+					fi
+				fi
+			fi
+		fi
+	fi
+else	msg=$(echo $1 | sed 's/[\t ]\+/ /g');
+fi
+
+# Strip leading and trailing white space (if any)
+msg=$(echo $msg | sed 's/^[\r\n\t ]\+|[\r\n\t ]\+$//g');
 
 if [ ! -z "$msg" ]
 then	echo 'Commiting all recent changes';
 	echo
-	echo "git commit -am '$1'";
+	echo "git commit -am '$msg'";
 	echo;
-	git commit -am "$1";
+	git commit -am "$msg";
 	echo; echo;
 fi
 
