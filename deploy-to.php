@@ -574,7 +574,7 @@ if ($output !== '') {
         'host' => $server->host,
         'server_name' => $server->name,
         'created' => date('Y-m-d H:i:s'),
-        'user' => $_SERVER['USERNAME'],
+        'user' => $server->user,
         'time_check_file' => unixPath($timeCheckFile),
         'file_C' => $fileC,
         'file_S' =>  ($fileC > 1) ? 's' : '',
