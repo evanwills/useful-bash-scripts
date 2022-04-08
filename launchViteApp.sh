@@ -1,10 +1,22 @@
 #!/bin/sh
 
+_code=$HOME'/Documents/code';
+
 appName="$1"
+
+isWc=$(echo $appName | sed 's/^wc-.*$/wc/i');
+
+if [ "$isWc" == "wc" ]
+then 	appName=$(echo $appName | sed 's/^wc-\(.*\)$/\1/i');
+else	isWc = '';
+fi
 
 repo=$(echo $appName | sed 's/\([A-Z]\)/-\1/g')
 repo=${repo,,}
-repo=$HOME'/Documents/Evan/code/'$repo'/';
+if [ "$isWc" == "wc" ]
+then	repo=$_code'/web-components/'$repo'/';
+else	repo=$_code'/'$repo'/';
+fi
 
 thisDir=$(realpath "$0" | sed "s/[^/']\+$//");
 
