@@ -8,6 +8,8 @@ badSrc=0;
 deleteSrc=0;
 revertSrc=0;
 source='';
+mariaPrefix='winpty';
+mariaBase='/c/Program Files/MariaDB 10.6/bin/mariadb.exe';
 
 decompressedExists () {
 	tmpSrc="$root/$1"
@@ -144,12 +146,14 @@ then
 		echo '======================================';
 		echo
 		# echo 'mariadb -v -p -u '$user $dbName' < '$source;
-		echo 'winpty mariadb -v -p -u '$user $dbName' < '$source;
+		# echo $mariaBase' '$user' -p '$dbName' < '$source;
 		if [ -z "$password" ]
-		then	# mariadb -v -p -u $user $dbName < $source
-			winpty mariadb -v -p -u $user $dbName < $source
+		then	# mariadb -v -u $user -p $dbName < $source
+			echo $mariaPrefix' '$mariaBase' -v -u '$user' -p '$dbName' < '$source;
+			$mariaPrefix $mariaBase -v -u $user -p $dbName < $source
 		else	# mariadb -v -password=$password -u $user $dbName < $source
-			winpty mariadb -v -password=$password -u $user $dbName < $source
+			echo $mariaPrefix' '$mariaBase' -v -u '$user' -p'$password' '$dbName' < '$source;
+			$mariaPrefix "$mariaBase" -v -u $user -p$password $dbName < $source
 		fi
 		echo
 		echo '======================================';
