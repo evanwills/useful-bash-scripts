@@ -1,6 +1,15 @@
 #!/bin/sh
 
-_code=$HOME'/Documents/code';
+if [ -d $HOME'/Documents/code' ]
+then	_code=$HOME'/Documents/code';
+else 	if [ -d $HOME'/Documents/Evan/code' ]
+	then	_code=$HOME'/Documents/Evan/code';
+	else	thisDir=$(realpath "$0" | sed "s/[^/']\+$//");
+		if [ -d $thisDir'../code' ]
+		then	_code=$thisDir'/../code';
+		fi
+	fi
+fi
 
 appName="$1"
 
