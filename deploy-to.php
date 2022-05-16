@@ -23,8 +23,8 @@
  *
  * PHP version 7.4
  *
- * @category Scripts
- * @package  Scripts
+ * @category Deployto
+ * @package  Deployto
  * @author   Evan Wills <evan.wills@acu.edu.au>
  * @license  MIT https://opensource.org/licenses/MIT
  * @link     https://github.com/evanwills/useful-bash-scripts
@@ -36,27 +36,19 @@
 // START: Boot-strapping
 
 
-$debugPath =  realpath(__DIR__.'/../includes/debug.inc.php');
+$debugPath =  realpath(__DIR__.'/debug.inc.php');
 
-if ($debugPath !== false && is_file($debugPath)) {
+if (is_string($debugPath) && substr($debugPath, -13) === 'debug.inc.php'
+    && is_file($debugPath)
+) {
     include_once $debugPath;
 } else {
-    /**
-     * Dummy debug function
-     *
-     * @return void
-     */
-    function debug()
-    {
-
-    }
+    function debug() { } // phpcs:ignore
 }
 
 define('PWD', realpath($_SERVER['PWD']).DIRECTORY_SEPARATOR);
 
 require_once realpath(__DIR__.'/deploy-to.inc.php');
-
-
 
 //  END:  Boot-strapping
 // ===================================================================
@@ -174,6 +166,7 @@ $defaultServer = false;
 $tmpEnv = (array_key_exists(2, $_SERVER['argv']) && trim($_SERVER['argv'][2]) !== '')
     ? trim($_SERVER['argv'][2])
     : '[[DEFAULT]]'; // "[[default]]" should not match any server name
+
 for ($a = 0; $a < count($data->servers); $a += 1) {
     /**
      * Details about one of the deployment targets for the
@@ -205,7 +198,7 @@ for ($a = 0; $a < count($data->servers); $a += 1) {
         );
     }
 
-    if ($tmp->name === $tmpEnv) {
+    if (isRightServer($tmp, $tmpEnv)) {
         $server = $tmp;
         $ok = true;
         break;
@@ -313,9 +306,10 @@ define('FANCY_DATE', 'H:i:s \o\n l, \t\h\e jS \o\f F Y');
  */
 define('TMPL', __DIR__.DIRECTORY_SEPARATOR.'deploy-to.tmpl.sh');
 
+
 //  END:  Initial setup & validation
 // ===================================================================
-// START: Main process
+// START: Function declarations
 
 
 /**
@@ -445,7 +439,3 @@ if ($output !== '') {
 
     file_put_contents($fileName, populateScript($parts));
 }
-
-
-//  END:  Main process
-// ===================================================================
