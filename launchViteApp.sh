@@ -17,7 +17,7 @@ isWc=$(echo $appName | sed 's/^wc-.*$/wc/i');
 
 if [ "$isWc" == "wc" ]
 then 	appName=$(echo $appName | sed 's/^wc-\(.*\)$/\1/i');
-else	isWc = '';
+else	$isWc = '';
 fi
 
 repo=$(echo $appName | sed 's/\([A-Z]\)/-\1/g')
