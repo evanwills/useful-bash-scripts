@@ -16,8 +16,8 @@ appName="$1"
 isWc=$(echo $appName | sed 's/^wc-.*$/wc/i');
 
 if [ "$isWc" == "wc" ]
-then 	appName=$(echo $appName | sed 's/^wc-\(.*\)$/\1/i');
-else	$isWc = '';
+then 	appName=$(echo "$appName" | sed 's/^wc-\(.*\)$/\1/i');
+else	isWc='';
 fi
 
 repo=$(echo $appName | sed 's/\([A-Z]\)/-\1/g')
@@ -37,7 +37,7 @@ fi
 
 lockFile=$HOME'/'$appName'.lock';
 
-launchThis="/bin/sh $thisDir/launchViteApp.sh $appName;";
+launchThis="/bin/sh $thisDir/launchViteApp.sh $1;";
 # echo '$thisDir: "'$thisDir'"';
 
 if [ ! -f $lockFile ]
@@ -63,6 +63,7 @@ then	touch $lockFile
 	echo "to restart, just run";
 	echo "	$launchThis";
 	echo; echo;
+
 	exit;
 else	echo;
 	echo "Regex $appName Dev server is already running.";

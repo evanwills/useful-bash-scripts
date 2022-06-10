@@ -30,9 +30,31 @@ echo;
 
 # Better evanh
 
-thisDir="`dirname \"$0\"`"              # relative
-thisDirAbs="`( cd \"$MY_PATH\" && pwd )`"
+# thisDir="`dirname \"$0\"`"              # relative
+# thisDirAbs="`( cd \"$MY_PATH\" && pwd )`"
 
-echo '$thisFile: '$thisDir
-echo '$thisFileAbs: '$thisDirAbs
-echo '$(pwd): '$(pwd)
+# echo '$thisFile: '$thisDir
+# echo '$thisFileAbs: '$thisDirAbs
+# echo '$(pwd): '$(pwd)
+
+
+# apps=(('regexMultiTool' 'Regex Multi-Tool') ('firingLogger' 'Firing logger') ('expensum' 'Expensum') ('wc-option-list-editor' 'Option list editor (WC)') ('wc-regex-input' 'Regex Input (WC)') ('regex-replace' 'Regex Find/Replace (WC)') ('drinking-chocolate' 'Drinking choclolate ratios (WC)') ('minecraft-sphere' 'Minecraft Sphere generator (WC)'));
+# ffProfiles=('acuDev' 'ACU' 'supported' 'default' 'redux');
+
+apps=(
+	'regexMultiTool|Regex Multi-Tool'
+	# 'firingLogger|Firing logger'
+	'expensum|Expensum'
+	'wc-option-list-editor|Option list editor (WC)'
+	# 'wc-regex-input|Regex Input (WC)'
+	# 'wc-regex-replace|Regex Find/Replace (WC)'
+	# 'wc-drinking-chocolate|Drinking choclolate ratios (WC)'
+	'wc-minecraft-sphere|Minecraft Sphere generator (WC)'
+);
+
+for i in "${apps[@]}";
+do	repo=$(echo $i | sed 's/|.*$//')
+	label=$(echo $i | sed 's/^[^|]\+|//')
+	echo '$repo = '$repo;
+	echo '$label = '$label
+done
