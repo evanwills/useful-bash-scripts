@@ -86,7 +86,8 @@ that is then executed by deploy-to.sh before being deleted.
 You need a `deploy-to.json` file in the root directory of the 
 application you wish to deploy to an environment.
 
-```json{
+```json
+{
   "default": "local",
   "servers": [
     {
