@@ -1,5 +1,8 @@
 #!/bin/sh
 
+webCompDir='/c/Users/evwills/Documents/Evan/code/web-components';
+
+
 echo;
 echo;
 
@@ -14,6 +17,8 @@ then	element=$(echo "$1" | grep '^[a-z]\+\(-[a-z]\+\)\+$');
 		echo "Next we'll install all the node modules.";
 		echo "Then we'll launch a development server for your new component.";
 		echo "And finally, we'll launch VS Code so you can start work.";
+
+		cd $webCompDir;
 
 		npm init vite@latest $element -- --template lit-ts;
 

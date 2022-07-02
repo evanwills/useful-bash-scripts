@@ -5,7 +5,7 @@ password='password';
 
 if [ ! -z "$1" ]
 then	dbName="$1";
-	startTime=$(date +'%Y-%m-%d--%H-%M-%S');
+	startTime=$(date +'%Y-%m-%d--%H-%M-%S' | sed 's/ /0/g');
 	backupFile=$dbName'__'$startTime'.sql';
 
 	echo;
