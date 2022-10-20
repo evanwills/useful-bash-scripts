@@ -29,6 +29,10 @@ indent_size = 4
 insert_final_newline = false
 indent_style = tab
 indent_size = 8
+[{.bashrc}]
+insert_final_newline = false
+indent_style = tab
+indent_size = 8
 
 
 [*.md]

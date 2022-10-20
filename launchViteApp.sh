@@ -1,5 +1,25 @@
 #!/bin/sh
 
+# ---------------------------------------------------------
+# This is the primary script that launches ViteJS servers
+#
+# For better usability, this script causes a new terminal
+# to be spawned each time a ViteJS dev server is launched
+# so the developer can have one terminal for doing things
+# (like running other scripts) while the server is running
+#
+# However, due to race conditions that were encountered
+# when launching multiple dev servers in close succcession
+# This script now generates a launch file (*.vite-serve)
+# with a deterministic name. Then when a new terminal is
+# launched the first launch file can be called then deleted.
+#
+# The actual launching of the server is done by done by
+# another script (launchViteApp.sub.sh) which is called by
+# the .bashrc file each time a terminal is opened.
+# ---------------------------------------------------------
+
+
 if [ -d $HOME'/Documents/code' ]
 then	_code=$HOME'/Documents/code';
 else 	if [ -d $HOME'/Documents/Evan/code' ]
@@ -11,23 +31,48 @@ else 	if [ -d $HOME'/Documents/Evan/code' ]
 	fi
 fi
 
-appName="$1"
+appName="$1";
+startCode="$2";
+ffProfile="$3";
 
-isWc=$(echo $appName | sed 's/^wc-.*$/wc/i');
-
-if [ "$isWc" == "wc" ]
-then 	appName=$(echo "$appName" | sed 's/^wc-\(.*\)$/\1/i');
-else	isWc='';
+if [ "$startCode" == 'code' ]
+then	startCode=1;
+else    if [ "$startCode" == '1' ]
+	then	startCode=1;
+	else    startCode=0;
+	fi
 fi
 
-repo=$(echo $appName | sed 's/\([A-Z]\)/-\1/g')
-repo=${repo,,}
-if [ "$isWc" == "wc" ]
-then	repo=$_code'/web-components/'$repo'/';
-else	repo=$_code'/'$repo'/';
+if [ -d $appName ]
+then	# $appName is directory
+
+	repo=$appName;
+	isWc=$(echo $appName | grep web-component)
+	if [ ! -z $isWc ]
+	then	isWc='wc';
+	else	isWc='';
+	fi
+	appName=$(echo $appName | sed 's/\/$//' | sed 's/^\([^\/]\+\/\)*\([^\/]\+\)$/\2/i')
+else	# Is normal $appName
+
+	isWc=$(echo $appName | sed 's/^wc-.*$/wc/i');
+
+	if [ "$isWc" == "wc" ]
+	then 	appName=$(echo "$appName" | sed 's/^wc-\(.*\)$/\1/i');
+	else	isWc='';
+	fi
+
+	repo=$(echo $appName | sed 's/\([A-Z]\)/-\1/g')
+	repo=${repo,,}
+	if [ "$isWc" == "wc" ]
+	then	repo=$_code'/web-components/'$repo'/';
+	else	repo=$_code'/'$repo'/';
+	fi
 fi
+
 
 thisDir=$(realpath "$0" | sed "s/[^/']\+$//");
+
 
 if [ ! -d $repo ]
 then	echo 'Could not find repo for '$appName
@@ -35,38 +80,41 @@ then	echo 'Could not find repo for '$appName
 	exit;
 fi
 
-lockFile=$HOME'/'$appName'.lock';
+lockFile=$HOME'/.'$appName'.vite.lock';
 
 launchThis="/bin/sh $thisDir/launchViteApp.sh $1;";
-# echo '$thisDir: "'$thisDir'"';
+
+
+# echo;
+# echo '# launchViteApp.sh';
+# echo 'repo:      '$repo;
+# echo 'app:       '$appName;
+# echo 'startCode: '$startCode;
+# echo 'lockFile:  '$lockFile;
 
 if [ ! -f $lockFile ]
-then	touch $lockFile
+then	# touch $lockFile
 
-	cd $repo
+	# Get a deterministic name for the server launch file
+	# App name may not always be populated
+	output="repo:$repo\napp:$appName\nstart:$startCode\nprofile:$ffProfile";
+	hash=$(echo $output | md5sum | cut -f1 -d" " | sed 's/^\([a-z0-9]\{5\}\).*$/\1/i');
 
-	echo;
-	echo 'About to start '$appName'.';
-	echo;
-	echo "(NOTE: I've set $lockFile to prevent duplicate servers being started for this application.)";
-	echo;
+	lk="$HOME/.$hash.vite-serve"
 
-	/c/Program\ Files/nodejs/npm run dev
+	if [ ! -f $lk ]
+	then	# Write the launch file
+		echo 'repo:'$repo > $lk;
+		echo 'app:'$appName >> $lk;
+		echo 'start:'$startCode >> $lk;
+		# echo 'profile:'$ffProfile >> $lk;
+	fi
 
-	echo;
+	# Spawn a new terminal just for the Vite server
+	start mintty -
 
-	rm $lockFile
-
-	echo; echo;
-	echo "I've removed the lock file ($lockFile) so you can start up next time.";
-	echo; echo;
-	echo "to restart, just run";
-	echo "	$launchThis";
-	echo; echo;
-
-	exit;
 else	echo;
-	echo "Regex $appName Dev server is already running.";
+	echo "$appName Dev server is already running.";
 	echo;
 	echo "It may be that you need to remove the lock file and rerun this script.";
 	echo;

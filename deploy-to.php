@@ -36,7 +36,7 @@
 // START: Boot-strapping
 
 
-$debugPath =  realpath(__DIR__.'/debug.inc.php');
+$debugPath =  realpath(__DIR__.'/../../../ACU/PHP/debug.inc.php');
 
 if (is_string($debugPath) && substr($debugPath, -13) === 'debug.inc.php'
     && is_file($debugPath)
@@ -53,6 +53,7 @@ require_once realpath(__DIR__.'/deploy-to.inc.php');
 //  END:  Boot-strapping
 // ===================================================================
 // START: Initial setup & validation
+
 
 /**
  * Name of the config data source for this script
@@ -84,7 +85,7 @@ if (!is_file($json)) {
             $json.' contained invalid JSON: '.$e->getMessage(),
             E_USER_ERROR
         );
-    }
+    };
 
     if (!property_exists($data, 'default')
         || !is_string($data->default)
@@ -311,7 +312,6 @@ define('TMPL', __DIR__.DIRECTORY_SEPARATOR.'deploy-to.tmpl.sh');
 // ===================================================================
 // START: Function declarations
 
-
 /**
  * List of all files to be uploaded (not grouped)
  *
@@ -325,7 +325,6 @@ for ($a = 0; $a < count($data->sourceList); $a += 1) {
         getDeployable($data->sourceList[$a], $sinceTime)
     );
 }
-
 
 $grouped = array();
 
