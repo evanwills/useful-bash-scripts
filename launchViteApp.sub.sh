@@ -59,4 +59,4 @@ then 	echo;
 	fi
 fi
 
-# kill -9 $PPID;
+kill -9 $PPID;

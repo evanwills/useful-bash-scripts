@@ -26,4 +26,4 @@ if [ $c -eq 0 ]
 then	echo 'No locks to delete this time';
 fi;
 
-# kill -9 $PPID;
+kill -9 $PPID;
