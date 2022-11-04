@@ -2,7 +2,6 @@
 
 
 sshDir=$HOME'/.ssh/';
-# sshDir='/home/evan/.ssh/';
 sshConf=$sshDir'config';
 thisDir=$(realpath "$0" | sed "s/[^/']\+$//");
 
