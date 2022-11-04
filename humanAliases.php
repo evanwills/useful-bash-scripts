@@ -8,7 +8,7 @@
  *
  * @category Scripts
  * @package  Scripts
- * @author   Evan Wills <evan.wills@acu.edu.au>
+ * @author   Evan Wills <evan.i.wills@gmail.com>
  * @license  MIT https://opensource.org/licenses/MIT
  * @link     https://github.com/evanwills/useful-bash-scripts
  */
@@ -257,6 +257,7 @@ function nonWin($input)
         return $input;
     }
 }
+
 /**
  * Convart list of alias strings to an array of key/value pairs
  * where the key is the alias name and the value is the command(s)
