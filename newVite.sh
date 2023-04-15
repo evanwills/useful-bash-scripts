@@ -299,7 +299,7 @@ then	echo 'About to create a new <'$project'></'$project'> project';
 
 	npm run dev
 
-	exit;
+	kill -9 $PPID;
 	# echo;
 	# echo;
 
