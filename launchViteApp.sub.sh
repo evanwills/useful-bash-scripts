@@ -8,11 +8,17 @@ if [ -z "$startCode" ]
 then	startCode=0;
 fi
 
+echo 'Inside launchViteApp.sub.sh';
+
 lockFile=$HOME'/.'$appName'.vite.lock';
 
 thisDir=$(realpath "$0" | sed "s/[^/']\+$//");
 launchThis="/bin/sh $thisDir/launchViteApp.sh $repo;";
-ffExe="/c/Program Files/Firefox\ Developer\ Edition/firefox.exe";
+
+ffExe='"/c/Program Files/Firefox Developer Edition/firefox.exe"';
+if [ ! -f "$ffExe" ]
+then	ffExe='"/c/Program Files/Mozilla Firefox/firefox.exe"';
+fi
 
 # echo;
 # echo '# launchViteApp.sub.sh'
@@ -31,8 +37,11 @@ if [ $startCode -eq 1 ]
 then	code -n $repo &
 fi
 
-if [ ! -z $ffProfile ]
-then	"$ffExe" --no-remote -P $ffProfile &
+if [ ! -z "$ffProfile" ]
+then	echo;
+	echo "About to launch FF using: ";
+	echo "\t$ffExe --no-remote -P $ffProfile &"
+	"$ffExe" --no-remote -P $ffProfile &
 fi
 
 if [ -d $repo ]
