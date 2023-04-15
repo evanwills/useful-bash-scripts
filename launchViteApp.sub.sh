@@ -14,25 +14,27 @@ thisDir=$(realpath "$0" | sed "s/[^/']\+$//");
 launchThis="/bin/sh $thisDir/launchViteApp.sh $repo;";
 ffExe="/c/Program Files/Firefox\ Developer\ Edition/firefox.exe";
 
-# echo;
-# echo '# launchViteApp.sub.sh'
-# echo '$repo:       '$repo;
-# echo '$appName:    '$appName;
-# echo '$startCode:  '$startCode;
-# echo '$lockFile:      '$lockFile;
-# echo '$thisDir:    '$thisDir;
-# echo '$launchThis: '$launchThis;
+echo;
+echo '# launchViteApp.sub.sh'
+echo '$repo:       '$repo;
+echo '$appName:    '$appName;
+echo '$startCode:  '$startCode;
+echo '$lockFile:      '$lockFile;
+echo '$thisDir:    '$thisDir;
+echo '$launchThis: '$launchThis;
 
 
 # Go to the repo's directory
 cd $repo
 
 if [ $startCode -eq 1 ]
-then	code -n $repo &
+then	echo 'Attempting to start VS Code in "'$repo'"'
+	code -n $repo &
 fi
 
 if [ ! -z $ffProfile ]
-then	"$ffExe" --no-remote -P $ffProfile &
+then	echo 'Attempting to start Firefox profile: "'$ffProfile'"'
+	"$ffExe" --no-remote -P $ffProfile &
 fi
 
 if [ -d $repo ]
