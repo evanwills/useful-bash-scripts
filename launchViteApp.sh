@@ -19,6 +19,12 @@
 # the .bashrc file each time a terminal is opened.
 # ---------------------------------------------------------
 
+# debug () {
+# 	echo '----------------------------------------';
+# 	echo "launchViteApp.sh - Line: $1";
+# 	echo "      \$$2: '$3'";
+# 	echo '----------------------------------------';
+# }
 
 if [ -d $HOME'/Documents/code' ]
 then	_code=$HOME'/Documents/code';
@@ -55,24 +61,27 @@ then	# $appName is directory
 	appName=$(echo $appName | sed 's/\/$//' | sed 's/^\([^\/]\+\/\)*\([^\/]\+\)$/\2/i')
 else	# Is normal $appName
 
-	isWc=$(echo $appName | sed 's/^wc-.*$/wc/i');
+	isWc=$(echo $appName | sed 's/^\(\(wc\|tsf\)-\)\?.*$/\2/i');
 
-	if [ "$isWc" == "wc" ]
-	then 	appName=$(echo "$appName" | sed 's/^wc-\(.*\)$/\1/i');
-	else	isWc='';
+	if [ ! -z "$isWc" ]
+	then 	appName=$(echo "$appName" | sed 's/^\(wc\|tsf\)-\(.*\)$/\2/i');
+		isWc=${$isWc,,};
 	fi
 
 	repo=$(echo $appName | sed 's/\([A-Z]\)/-\1/g')
-	repo=${repo,,}
-	if [ "$isWc" == "wc" ]
-	then	repo=$_code'/web-components/'$repo'/';
-	else	repo=$_code'/'$repo'/';
-	fi
+	repo=${repo,,};
+	case "$isWc" in
+		'wc')	repo=$_code'/web-components/'$repo'/';
+			;;
+		'tsf')	repo=$HOME'/Documents/TSF-code/'$repo'/';
+			;;
+		*)	repo=$_code'/'$repo'/';
+			;;
+	esac
 fi
 
 
 thisDir=$(realpath "$0" | sed "s/[^/']\+$//");
-
 
 if [ ! -d $repo ]
 then	echo 'Could not find repo for '$appName
@@ -84,13 +93,12 @@ lockFile=$HOME'/.'$appName'.vite.lock';
 
 launchThis="/bin/sh $thisDir/launchViteApp.sh $1;";
 
-
 # echo;
 # echo '# launchViteApp.sh';
-# echo 'repo:      '$repo;
-# echo 'app:       '$appName;
-# echo 'startCode: '$startCode;
-# echo 'lockFile:  '$lockFile;
+# debug 113 'repo' "$repo";
+# debug 114 'appName' "$appName";
+# debug 114 'startCode' "$startCode";
+# debug 116 'lockFile' "$lockFile";
 
 if [ ! -f $lockFile ]
 then	# touch $lockFile
@@ -98,7 +106,7 @@ then	# touch $lockFile
 	# Get a deterministic name for the server launch file
 	# App name may not always be populated
 	output="repo:$repo\napp:$appName\nstart:$startCode\nprofile:$ffProfile";
-	hash=$(echo $output | md5sum | cut -f1 -d" " | sed 's/^\([a-z0-9]\{5\}\).*$/\1/i');
+	hash=$(echo $output | md5sum | cut -f1 -d" " | sed 's/^\([a-z0-9]\{8\}\).*$/\1/i');
 
 	lk="$HOME/.$hash.vite-serve"
 
