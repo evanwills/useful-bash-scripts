@@ -20,26 +20,27 @@ if [ ! -f "$ffExe" ]
 then	ffExe='"/c/Program Files/Mozilla Firefox/firefox.exe"';
 fi
 
-# echo;
-# echo '# launchViteApp.sub.sh'
-# echo '$repo:       '$repo;
-# echo '$appName:    '$appName;
-# echo '$startCode:  '$startCode;
-# echo '$lockFile:      '$lockFile;
-# echo '$thisDir:    '$thisDir;
-# echo '$launchThis: '$launchThis;
+echo;
+echo '# launchViteApp.sub.sh'
+echo '$repo:       '$repo;
+echo '$appName:    '$appName;
+echo '$startCode:  '$startCode;
+echo '$lockFile:      '$lockFile;
+echo '$thisDir:    '$thisDir;
+echo '$launchThis: '$launchThis;
 
 
 # Go to the repo's directory
 cd $repo
 
 if [ $startCode -eq 1 ]
-then	code -n $repo &
+then	echo 'Attempting to start VS Code in "'$repo'"'
+	code -n $repo &
 fi
 
 if [ ! -z "$ffProfile" ]
 then	echo;
-	echo "About to launch FF using: ";
+	echo Attempting to start Firefox profile: "'$ffProfile'";
 	echo "\t$ffExe --no-remote -P $ffProfile &"
 	"$ffExe" --no-remote -P $ffProfile &
 fi
