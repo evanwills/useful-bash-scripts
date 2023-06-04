@@ -39,7 +39,7 @@ fi
 #                           repositories can this
 #                           repo be pushed to
 # -----------------------------------------------
-remotes=$(git remote -v | grep -c pull);
+remotes=$(git remote -v | grep -c fetch);
 
 if [ $remotes -gt 1 ]
 then	s='ies';
@@ -61,7 +61,7 @@ do	# -----------------------------------------------
 	# @var {string} $tmp - Full remote listing for a
         #                      given repository
 	# -----------------------------------------------
-	tmp=$(git remote -v | grep pull | head -n $remotes | tail -n 1)
+	tmp=$(git remote -v | grep fetch | head -n $remotes | tail -n 1)
 
 	# -----------------------------------------------
 	# @var {string} $remote - Name of the remote
