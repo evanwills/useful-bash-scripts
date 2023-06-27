@@ -1,6 +1,6 @@
 #!/bin/sh
 
-targets=('~/code/');
+targets=('/c/Users/Evan/Documents/Evan/code/');
 tmplName='';
 
 getRightTarget () {
@@ -232,34 +232,40 @@ done;
 tmplName=$(getTmplName "$tmpl");
 targetDir='';
 
-if [ ! -z "$3" ]
-then	targetDir=$(getRightTarget "$3");
-fi
+_len=${#targets[@]};
 
-if [ -z "$targetDir" ]
-then	echo 'The current target diretory (when the project will be created) is:'
-	echo '   "'${targets[0]}'"';
-	echo;
+if [ $_len -gt 1 ]
+then	if [ ! -z "$3" ]
+	then	targetDir=$(getRightTarget "$3");
+	fi
 
-	while [ "$targetDir" == '' ]
-	do	echo;
-		echo 'Please enter the number for the target directory you want:';
+	if [ -z "$targetDir" ]
+	then	echo 'The current target diretory (when the project will be created) is:'
+		echo '   "'${targets[0]}'"';
+		echo;
 
-		for _i in ${!targets[@]};
-		do	echo '  '$_i'. "'${targets[$_i]}'"';
+		while [ "$targetDir" == '' ]
+		do	echo;
+			echo 'Please enter the number for the target directory you want:';
+
+			for _i in ${!targets[@]};
+			do	echo '  '$_i'. "'${targets[$_i]}'"';
+			done
+			echo 'or, press enter to use current target.'
+			echo;
+			read targetDir;
+
+			targetDir=$(echo "$targetDir" | tr '[:upper:]' '[:lower:]' | sed 's/^[ \t]+\|[ \t]+$//g');
+
+			if [ -z "$targetDir" ]
+			then	targetDir=${targets[0]};
+			else	targetDir=$(getRightTarget "$targetDir");
+			fi
+			echo;
 		done
-		echo 'or, press enter to use current target.'
-		echo;
-		read targetDir;
-
-		targetDir=$(echo "$targetDir" | tr '[:upper:]' '[:lower:]' | sed 's/^[ \t]+\|[ \t]+$//g');
-
-		if [ -z "$targetDir" ]
-		then	targetDir=$litCompDir;
-		else	targetDir=$(getRightTarget "$targetDir");
-		fi
-		echo;
-	done
+	fi
+else
+	targetDir=${targets[0]};
 fi
 
 if [ ! -z "$project" ]
