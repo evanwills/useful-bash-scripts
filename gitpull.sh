@@ -1,17 +1,8 @@
 #!/bin/sh
 
 # ---------------------------------------------------------
-# This script pushes the current branch up to all remote
+# This script pulls the current branch down from all remote
 # repositories this instance of the ropo knows about.
-#
-# If only one parameter is passed to the script, the script
-# will execute a commit using the passed string as the
-# message, before pushing the repo up to the remote
-# servers.
-# If more than one parameter is passed, it is assumed the
-# user forgot to wrap their commit message in quotes. The
-# first 9 parameters will be concatinated to form a single
-# string which will be used as the commit message.
 #
 # This script was created because, even though I was
 # commiting changes on a regular basis, I kept forgetting
@@ -19,8 +10,8 @@
 # kept asking me to do so.
 #
 # Author:  Evan Wills <evan.i.wills@gmail.com>
-# Created: 2021-10-20
-# Updated: 2022-02-04
+# Created: 2023-06-05
+# Updated: 2023-06-05
 # ---------------------------------------------------------
 
 
@@ -86,7 +77,11 @@ do	# -----------------------------------------------
 	# -----------------------------------------------
 	domain=$(echo $tmp | sed 's/^[^@]\+@\([^:]\+\):.*$/\1/')
 
+<<<<<<< HEAD
 	echo 'pulling '$branch' branch down from '$remote' ('$domain')';
+=======
+	echo 'Pulling '$branch' branch down from '$remote' ('$domain')';
+>>>>>>> 588e0a71e6512df011332a3f6a9a006d12e31dc1
 
 	git pull $remote $branch;
 

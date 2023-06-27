@@ -2,6 +2,10 @@
 
 targets=('/c/Users/Evan/Documents/Evan/code/');
 tmplName='';
+vue2Modules='';
+vue2=0;
+thisDir=$(realpath "$0" | sed "s/[^/']\+$//");
+# viteVersion='latest';
 
 getRightTarget () {
 	_path=${targets[$1]};
@@ -67,6 +71,10 @@ getRightTmpl () {
 		'12')	_tmpl='svelte-ts';
 			;;
 
+		# 'vue2')	;;
+		# '13')	_tmpl='vue2';
+		# 	;;
+
 		*)	_tmpl='';
 			;;
 	esac
@@ -107,6 +115,10 @@ getTmplName () {
 			;;
 
 		'vanilla')
+			# if [ $vue2 -eq 1 ]
+			# then 	_tmplName='Vue 2.x (Pure JS)';
+			# else 	_tmplName='Vanilla JS';
+			# fi
 			_tmplName='Vanilla JS';
 			;;
 
@@ -182,6 +194,118 @@ forceEditorconfig () {
 	fi
 }
 
+# generateAppVue () {
+# 	if [ ! -d "$1" ]
+# 	then	echo 'Supplied path ("'$1'") is not a path to a local file system directory';
+# 		exit;
+# 	fi
+
+# 	if [ ! -d "$1/src" ]
+# 	then	echo 'Supplied path ("'$1'/src/") is not a path to a local file system directory';
+# 		exit;
+# 	fi
+
+# 	_appVue="$1/src/App.vue";
+
+# 	if [ ! -f "$_appVue" ]
+# 	then	echo '<script setup>' > $_appVue;
+# 		echo "import $element from './components/$element.vue'" >> $_appVue;
+# 		echo '</script>' >> $_appVue;
+# 		echo >> $_appVue;
+# 		echo '<template>' >> $_appVue;
+# 		echo '	<'$element'>Dummy content</'$element'>' >> $_appVue;
+# 		echo '</template>' >> $_appVue;
+# 		echo >> $_appVue;
+# 		echo '<style lang="scss">' >> $_appVue;
+# 		echo '</style>' >> $_appVue;
+# 		echo >> $_appVue;
+# 	fi
+# }
+
+# generateElementVue () {
+# 	if [ ! -d "$1" ]
+# 	then	echo 'Supplied path ("'$1'") is not a path to a local file system directory';
+# 		exit;
+# 	fi
+
+# 	if [ ! -d "$1/src" ]
+# 	then	echo 'Supplied path ("'$1'/src/") is not a path to a local file system directory';
+# 		exit;
+# 	fi
+
+# 	if [ ! -d "$1/src/components" ]
+# 	then	echo 'Supplied path ("'$1'/src/components/") is not a path to a local file system directory';
+# 		exit;
+# 	fi
+
+# 	if [ -z "$2" ]
+# 	then	echo 'Second parameter, ($elementName) must be a non-empty string';
+# 		exit;
+# 	fi
+
+# 	_elemName="$2";
+# 	_elemVue="$1/src/components/$_elemName.vue";
+
+# 	if [ ! -f "$_elemVue" ]
+# 	then	echo '<script>' > $_appVue;
+# 		echo "import $_elemName from './components/$_elemName.vue'" >> $_elemVue;
+# 		echo '</script>' >> $_elemVue;
+# 		echo >> $_elemVue;
+# 		echo '<template>' >> $_elemVue;
+# 		echo '	<'$_elemName'>Dummy content</'$_elemName'>' >> $_elemVue;
+# 		echo '</template>' >> $_elemVue;
+# 		echo >> $_elemVue;
+# 		echo '<style lang="scss">' >> $_elemVue;
+# 		echo '</style>' >> $_elemVue;
+# 		echo >> $_elemVue;
+# 	fi
+# }
+
+# generateMainJs () {
+# 	if [ ! -d "$1" ]
+# 	then	echo 'Supplied path ("'$1'") is not a path to a local file system directory';
+# 		exit;
+# 	fi
+
+# 	if [ ! -d "$1/src" ]
+# 	then	echo 'Supplied path ("'$1'/src/") is not a path to a local file system directory';
+# 		exit;
+# 	fi
+
+# 	_mainJs="$1/src/main.js";
+
+# 	if [ ! -f "$_mainJs" ]
+# 	then	echo "import { createApp } from 'vue'" > $_mainJs;
+# 		echo "import './style.css'" >> $_mainJs;
+# 		echo "import App from './App.vue'" >> $_mainJs;
+# 		echo >> $_mainJs;
+# 		echo "createApp(App).mount('#app')" >> $_mainJs;
+# 		echo >> $_mainJs;
+# 	fi
+# }
+
+# generateViteConfig () {
+# 	if [ ! -d "$1" ]
+# 	then	echo 'Supplied path ("'$1'") is not a path to a local file system directory';
+# 		exit;
+# 	fi
+
+# 	_viteConfig="$1/vite.config.js";
+
+# 	if [ ! -f "$_viteConfig" ]
+# 	then	echo "import { defineConfig } from 'vite'" > $_viteConfig
+# 		echo "import createVuePlugin from 'vite-plugin-vue2'" >> $_viteConfig
+# 		# echo "import vue from '@vitejs/plugin-legacy'" >> $_viteConfig
+# 		# echo "import vue from '@vitejs/plugin-vue'" >> $_viteConfig
+# 		echo "" >> $_viteConfig
+# 		echo "// https://vitejs.dev/config/" >> $_viteConfig
+# 		echo "export default defineConfig({" >> $_viteConfig
+# 		echo "  plugins: [vue()]," >> $_viteConfig
+# 		echo "})" >> $_viteConfig
+# 	else	sed -i 's/\(@vitejs\/plugin-\)vue/\1legacy/' $_viteConfig;
+# 	fi
+# }
+
 echo;
 echo;
 
@@ -222,6 +346,7 @@ do	echo;
 	echo '  10 - "preact-ts" - React (TypeScript)';
 	echo '  11 - "svelte" - Svelt (pure JS)';
 	echo '  12 - "svelte-ts" - Svelte (TypeScript)';
+	echo '  13 - "vue2" - Vue 2.x (pure JS)';
 	echo
 	read tmpl;
 
@@ -229,7 +354,24 @@ do	echo;
 	# echo '$tmpl: '$tmpl;
 done;
 
+# if [ "$tmpl" == 'vue2' ]
+# then	tmpl='vue';
+# 	vue2Modules='vite-plugin-vue2 @vitejs/plugin-legacy vite-plugin-html vue-template-compiler sass sass-loader';
+# 	# vue2Modules=$vue2Modules' postcss @fullhuman/postcss-purgecss autoprefixer';
+# 	vue2=1;
+# 	viteVersion='3';
+# fi
+
 tmplName=$(getTmplName "$tmpl");
+
+
+# echo '$tmplName:    "'$tmplName'"';
+# echo '$vue2Modules: "'$vue2Modules'"';
+# echo '$vue2:        "'$vue2'"';
+# echo '$project:     "'$project'"';
+# echo '$element:     "'$element'"';
+# echo '$tmpl:        "'$tmpl'"';
+
 targetDir='';
 
 _len=${#targets[@]};
@@ -278,29 +420,73 @@ then	echo 'About to create a new <'$project'></'$project'> project';
 	echo "Then we'll launch a development server for your new component.";
 	echo "And finally, we'll launch VS Code so you can start work.";
 
+	echo;
+	echo 'Current working directory:'
+	echo '	'$(pwd);
+	echo;
+	echo 'moving to diretory:';
+	echo '    '$targetDir;
+
 	cd "$targetDir";
 
-	npm init vite@latest $project -- --template $tmpl;
+	echo;
+	echo 'Current working directory:'
+	echo '	'$(pwd);
+	echo;
 
-	cd $project;
+	echo;
+	echo "npm create vite@latest $project -- --template $tmpl;";
+	echo;
+
+	npm create vite@latest $project -- --template $tmpl;
+
+	echo;
+	echo 'Current working directory:'
+	echo '	'$(pwd);
+	echo;
+	echo 'Moving to project diretory:';
+	echo '	'$targetDir$project;
+
+	cd $targetDir$project;
+
+	echo;
+	echo 'Current working directory:'
+	echo '	'$(pwd);
+	echo;
 
 	code -n $(pwd) &
 	npm install;
 
 	forceEditorconfig
 
-	mv README.md README.vite.md
+	if [ -f README.md ]
+	then	mv README.md README.vite.md
+	fi;
+
 	echo '# `<'$element'>`' > README.md
 	echo >> README.md
 	echo >> README.md
 	echo 'See info about [Vite and '$tmplName'](README.vite.md)' >> README.md
 	echo >> README.md
 
-	mv src/components/HelloWorld.vue src/components/$element.vue
-	sed -i 's/HelloWorld/'$element'/g' **/*.vue **/**/*.vue
+	if [ -f src/components/HelloWorld.vue ]
+	then	mv src/components/HelloWorld.vue src/components/$element.vue
+		sed -i 's/HelloWorld/'$element'/g' **/*.vue **/**/*.vue
+	fi;
+
+	toGit='';
+
+	gitFileList=(.editorconfig .gitignore index.html package.json package-lock.json README.* public/vite.svg src/assets/vue.svg src/App.vue src/style.cs src/components/$element.vue tsconfig.json tsconfig.node.json vite.config.ts src/main.ts src/vite-env.d.ts vite.config.js src/main.js)
+
+	for file in "${gitFileList[@]}"
+	do	if [ -f "$file" ]
+		then	toGit=' '$file;
+		fi;
+	done
 
 	git init;
-	git add .editorconfig .gitignore index.html package.json package-lock.json README.* tsconfig.json tsconfig.node.json vite.config.ts public/vite.svg .vscode/extensions.json src/assets/vue.svg src/App.vue src/main.ts src/style.css src/vite-env.d.ts src/components/$element.vue
+	git add $toGit
+
 	git commit -m 'initial commit';
 
 	npm run dev
