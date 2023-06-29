@@ -77,11 +77,7 @@ do	# -----------------------------------------------
 	# -----------------------------------------------
 	domain=$(echo $tmp | sed 's/^[^@]\+@\([^:]\+\):.*$/\1/')
 
-<<<<<<< HEAD
-	echo 'pulling '$branch' branch down from '$remote' ('$domain')';
-=======
 	echo 'Pulling '$branch' branch down from '$remote' ('$domain')';
->>>>>>> 588e0a71e6512df011332a3f6a9a006d12e31dc1
 
 	git pull $remote $branch;
 
