@@ -1,10 +1,10 @@
 #!/bin/sh
 
-targets=('/c/Users/Evan/Documents/Evan/code/');
+thisDir=$(realpath "$0" | sed "s/[^/']\+$//");
+targets=($thisDir'/../');
 tmplName='';
 vue2Modules='';
 vue2=0;
-thisDir=$(realpath "$0" | sed "s/[^/']\+$//");
 # viteVersion='latest';
 
 getRightTarget () {

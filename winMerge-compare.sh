@@ -144,6 +144,6 @@ fi
 
 if [ ! -z "$isDiff" ]
 then	echo 'Comparing: "'$file'"'
-	WinMergeU -s -e -fl --ignoreeol $l $m $r;
+	WinMergeU -s -e -fl --ignoreeol $l $m $r &
 else	echo '- - Skipping: "'$file'"'
 fi
