@@ -346,7 +346,7 @@ do	echo;
 	echo '  10 - "preact-ts" - React (TypeScript)';
 	echo '  11 - "svelte" - Svelt (pure JS)';
 	echo '  12 - "svelte-ts" - Svelte (TypeScript)';
-	echo '  13 - "vue2" - Vue 2.x (pure JS)';
+	# echo '  13 - "vue2" - Vue 2.x (pure JS)';
 	echo
 	read tmpl;
 
