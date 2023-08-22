@@ -1,8 +1,17 @@
 #!/bin/sh
 
 # ---------------------------------------------------------
-# This script pulls the current branch down from all remote
+# This script pushes the current branch up to all remote
 # repositories this instance of the ropo knows about.
+#
+# If only one parameter is passed to the script, the script
+# will execute a commit using the passed string as the
+# message, before pushing the repo up to the remote
+# servers.
+# If more than one parameter is passed, it is assumed the
+# user forgot to wrap their commit message in quotes. The
+# first 9 parameters will be concatinated to form a single
+# string which will be used as the commit message.
 #
 # This script was created because, even though I was
 # commiting changes on a regular basis, I kept forgetting
@@ -10,7 +19,7 @@
 # kept asking me to do so.
 #
 # Author:  Evan Wills <evan.i.wills@gmail.com>
-# Created: 2023-06-05
+# Created: 2021-10-20
 # Updated: 2023-06-05
 # ---------------------------------------------------------
 
