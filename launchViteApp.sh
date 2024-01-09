@@ -61,10 +61,10 @@ then	# $appName is directory
 	appName=$(echo $appName | sed 's/\/$//' | sed 's/^\([^\/]\+\/\)*\([^\/]\+\)$/\2/i')
 else	# Is normal $appName
 
-	isWc=$(echo $appName | sed 's/^\(\(wc\|tsf\)-\)\?.*$/\2/i');
+	isWc=$(echo $appName | sed 's/^\(\(wc\|tsf|vue3\)-\)\?.*$/\2/i');
 
 	if [ ! -z "$isWc" ]
-	then 	appName=$(echo "$appName" | sed 's/^\(wc\|tsf\)-\(.*\)$/\2/i');
+	then 	appName=$(echo "$appName" | sed 's/^\(wc\|tsf|vue3\)-\(.*\)$/\2/i');
 		isWc=${$isWc,,};
 	fi
 
@@ -74,6 +74,8 @@ else	# Is normal $appName
 		'wc')	repo=$_code'/web-components/'$repo'/';
 			;;
 		'tsf')	repo=$HOME'/Documents/TSF-code/'$repo'/';
+			;;
+		'v3')	repo=$HOME'/Documents/Evan/code/family-portal--Vue3--component/'$repo'/';
 			;;
 		*)	repo=$_code'/'$repo'/';
 			;;

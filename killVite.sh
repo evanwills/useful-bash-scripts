@@ -1,6 +1,6 @@
 #!/bin/sh
 
-locks=($(ls -a $HOME | grep '\.vite\.lock'))
+locks=($(ls -a $HOME | grep '\.vite\.lock'));
 
 c=0;
 # echo ${locks[@]}
@@ -13,6 +13,17 @@ do	lock=$HOME/$i
 
 	rm $lock;
 	c=$((c+1));
+done
+
+sLock=($(ls -a $HOME | grep '\.vite-serve'));
+for i in ${sLock[@]}
+do	lock=$HOME/$i
+
+	name=$(echo $i | sed 's/^\.\([^.]\+\)\.vite-serve$/\1/i');
+
+	echo 'Femoving lock for '$name' ('$lock')';
+
+	rm $lock;
 done
 
 fLock=$HOME'/.ff-lock';

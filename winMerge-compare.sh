@@ -11,8 +11,13 @@
 # * Left directory path
 # * Middle directory path
 # * Right directory path. If omitted, right dir path should be "XX"
-# * Relative directory path to file. If omitted, rel dir path should be "XX"
+# * Relative directory path to file. If omitted, rel dir path should
+#   be "XX"
 # * File name. Name of file to be compared in all directories.
+#
+# Accepts optional 6th argument:
+# * Number (in the list of files being processed) this file
+#   represents
 #
 # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # WinMerge CLI arguents used below:
@@ -50,6 +55,8 @@
 #   https://www.gnu.org/software/diffutils/manual/html_node/diff-Options.html
 # -------------------------------------------------------------------
 
+fileCount="$6";
+copied=0;
 
 
 # Check if both sides of a pair of files exist
@@ -61,6 +68,8 @@
 function copyMissingPair () {
 	first="$1";
 	second="$2";
+	fName="$3";
+	copyNum="$4";
 
 	if [ -z "$first" ]
 	then	# Can't copy if first path is empty
@@ -68,7 +77,7 @@ function copyMissingPair () {
 	fi;
 
 	if [ -z "$second" ]
-	then	# Can't copy if secon path is empty
+	then	# Can't copy if second path is empty
 		return;
 	fi;
 
@@ -82,19 +91,38 @@ function copyMissingPair () {
 	if [ -f "$first" ]
 	then	if [ ! -f "$second" ]
 		then	# Copied first file to second file path
-			cp -v "$first" "$second";
+			echo $fileCount'	- - copying: "'$fName'"';
+
+			cp "$first" "$second";
+
+			copied=1;
 			return;
 		fi;
 	else 	if [ ! -f "$first" ]
 		then	if [ -f "$second" ]
 			then	# Copied second file to first file path
-				cp -v "$second" "$first"
+				echo $fileCount'	- - copying: "'$fName'"';
+
+				cp "$second" "$first";
+
+				copied=1;
 				return;
 			fi
 		fi
 	fi;
 
 	# Could not copy files
+}
+
+function addMissingDir () {
+	newdir="$1";
+
+	if [ ! -d "$newdir" ]
+	then	echo;
+		echo 'Creating missing directory:'
+		echo '	"'$newdir'"';
+		mkdir -p "$newdir"
+	fi
 }
 
 
@@ -117,33 +145,44 @@ l=$lRoot$relPath$file;
 m=$mRoot$relPath$file;
 r='';
 
+addMissingDir "$lRoot$relPath";
+addMissingDir "$mRoot$relPath";
+
 if [ ! -z "$rRoot" ]
 then	r=$rRoot$relPath$file;
+	addMissingDir "$rRoot$relPath";
 fi
 
-copyMissingPair "$l" "$m";
-copyMissingPair "$l" "$r";
-copyMissingPair "$m" "$r";
+if [ ! -d "$lRoot$relPath" ]
+then	echo;
+	echo 'Creating new directory: "'$lRoot$relPath'"';
+	mkdir "$lRoot$relPath"
+fi
 
-# echo "\$lRoot: '$lRoot'";
-# echo "\$mRoot: '$mRoot'";
-# echo "\$rRoot: '$rRoot'";
-# echo "\$relPath: '$relPath'";
-# echo "\$file: '$file'";
-# echo "\$l: '$l'";
-# echo "\$m: '$m'";
-# echo "\$r: '$r'";
+copyMissingPair "$l" "$m" "$file" ;
+copyMissingPair "$l" "$r" "$file";
+copyMissingPair "$m" "$r" "$file";
 
-isDiff=$(diff -q -Z $l $m | grep differ);
+suffix=$(echo "$file" | grep '\.\(png\|jpg\|ttf\|woff2\?\|eot\|\)$')
 
-if [ -z "$isDiff" ]
-then	if [ ! -z "$r" ]
-		then	isDiff=$(diff -q -Z $m $r | grep differ);
+if [ -z "$suffix" ]
+then	# Check if any of the files were copied. If so, don't
+	# bother comparing.
+	if [ $copied -eq 0 ]
+	then
+		isDiff=$(diff -q -Z $l $m | grep differ);
+
+		if [ -z "$isDiff" ]
+		then	if [ ! -z "$r" ]
+				then	isDiff=$(diff -q -Z $m $r | grep differ);
+				fi
 		fi
-fi
 
-if [ ! -z "$isDiff" ]
-then	echo 'Comparing: "'$file'"'
-	WinMergeU -s -e -fl --ignoreeol $l $m $r &
-else	echo '- - Skipping: "'$file'"'
+		if [ ! -z "$isDiff" ]
+		then	echo $fileCount'	Comparing: "'$file'"'
+			WinMergeU -s -e -fl --ignoreeol $l $m $r &
+		else	echo $fileCount'	- - Skipping: "'$file'"'
+		fi
+	fi
+else	echo $fileCount'	- - Ignoring binrary file: "'$file'"';
 fi

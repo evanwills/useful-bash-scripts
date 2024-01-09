@@ -71,9 +71,10 @@ getRightTmpl () {
 		'12')	_tmpl='svelte-ts';
 			;;
 
-		# 'vue2')	;;
-		# '13')	_tmpl='vue2';
-		# 	;;
+		'vue2')	;;
+		'13')	_tmpl='vue2';
+			vue2=1;
+			;;
 
 		*)	_tmpl='';
 			;;
@@ -85,6 +86,9 @@ getRightTmpl () {
 getTmplName () {
 	case "$1" in
 		'vue')	_tmplName='VueJS'
+			;;
+
+		'vue2')	_tmplName='Vue 2.x (Pure JS)'
 			;;
 
 		'vue-ts')
@@ -115,11 +119,11 @@ getTmplName () {
 			;;
 
 		'vanilla')
-			# if [ $vue2 -eq 1 ]
-			# then 	_tmplName='Vue 2.x (Pure JS)';
-			# else 	_tmplName='Vanilla JS';
-			# fi
-			_tmplName='Vanilla JS';
+			if [ $vue2 -eq 1 ]
+			then 	_tmplName='Vue 2.x (Pure JS)';
+			else 	_tmplName='Vanilla JS';
+			fi
+			# _tmplName='Vanilla JS';
 			;;
 
 		'vanilla-ts')
@@ -139,6 +143,8 @@ getTmplName () {
 	esac
 
 	echo $_tmplName;
+	# echo '(Line: 145) $_tmplName: '$_tmplName;
+	# echo '(Line: 145) $vue2: '$vue2;
 }
 
 forceEditorconfig () {
@@ -309,8 +315,11 @@ forceEditorconfig () {
 echo;
 echo;
 
-project=$(echo "$1" | grep '^[a-z]\+\(-[a-z0-9]\+\)\+$');
-element=$(sed -r 's/(^|-)(\w)/\U\2/g' <<<"$project");
+project=$(echo "$1" | grep '^[a-z]\+\(-\+[a-z0-9]\+\)\+$');
+element=$(sed -r 's/(^|-+)(\w)/\U\2/g' <<<"$project");
+
+# echo '(line 321) $project: '$project;
+# echo '(line 322) $element: '$element;
 
 while [ -z "$project" ]
 do	echo;
@@ -351,16 +360,17 @@ do	echo;
 	read tmpl;
 
 	tmpl=$(getRightTmpl "$tmpl");
-	# echo '$tmpl: '$tmpl;
+	echo '(Line 360) $tmpl: '$tmpl;
+	echo '(Line 361) $vue2: '$vue2;
 done;
 
-# if [ "$tmpl" == 'vue2' ]
-# then	tmpl='vue';
-# 	vue2Modules='vite-plugin-vue2 @vitejs/plugin-legacy vite-plugin-html vue-template-compiler sass sass-loader';
-# 	# vue2Modules=$vue2Modules' postcss @fullhuman/postcss-purgecss autoprefixer';
-# 	vue2=1;
-# 	viteVersion='3';
-# fi
+if [ $tmpl == 'vue2' ]
+then	tmpl='vue';
+	vue2Modules='vite-plugin-vue2 @vitejs/plugin-legacy vite-plugin-html vue-template-compiler sass sass-loader';
+	# vue2Modules=$vue2Modules' postcss @fullhuman/postcss-purgecss autoprefixer';
+	vue2=1;
+	viteVersion='3';
+fi
 
 tmplName=$(getTmplName "$tmpl");
 
@@ -372,6 +382,7 @@ tmplName=$(getTmplName "$tmpl");
 # echo '$element:     "'$element'"';
 # echo '$tmpl:        "'$tmpl'"';
 
+# exit;
 targetDir='';
 
 _len=${#targets[@]};
@@ -456,6 +467,9 @@ then	echo 'About to create a new <'$project'></'$project'> project';
 
 	code -n $(pwd) &
 	npm install;
+	if [ ! -z $vue2Modules ]
+	then	npm install $vue2Modules;
+	fi;
 
 	forceEditorconfig
 
