@@ -200,6 +200,25 @@ forceEditorconfig () {
 	fi
 }
 
+forceGitAttributes () {
+	_ga=$(pwd)'/.gitattributes';
+
+	# Make sure there is a .gitattributes file in the application directory
+	if [ ! -f "$_ga" ]
+	then	echo '# Make sure line endings (in all text files) are linux style on all systems' > $_ga;
+		echo '* text eol=lf' >> $_ga;
+		echo >> $_ga;
+		echo '# Denote all files that are truly binary and should not be modified.' >> $_ga;
+		echo '*.eot binary' >> $_ga;
+		echo '*.jpg binary' >> $_ga;
+		echo '*.png binary' >> $_ga;
+		echo '*.ttf binary' >> $_ga;
+		echo '*.woff binary' >> $_ga;
+		echo '*.woff2 binary' >> $_ga;
+		echo >> $_ga;
+	fi
+}
+
 # generateAppVue () {
 # 	if [ ! -d "$1" ]
 # 	then	echo 'Supplied path ("'$1'") is not a path to a local file system directory';
@@ -471,7 +490,8 @@ then	echo 'About to create a new <'$project'></'$project'> project';
 	then	npm install $vue2Modules;
 	fi;
 
-	forceEditorconfig
+	forceEditorconfig;
+	forceGitAttributes;
 
 	if [ -f README.md ]
 	then	mv README.md README.vite.md
