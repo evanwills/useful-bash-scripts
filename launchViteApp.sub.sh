@@ -3,14 +3,22 @@
 repo="$1";
 appName="$2";
 startCode=$3;
+delay=$4;
 
 if [ -z "$startCode" ]
 then	startCode=0;
+else	startCode=1;
+fi
+
+if [ -z "$delay" ]
+then	delay=0;
 fi
 
 echo 'Inside launchViteApp.sub.sh';
 
-lockFile=$HOME'/.'$appName'.vite.lock';
+lkFl=$(echo "$appName" | sed 's/[^a-z0-9]\+/-/g');
+
+lockFile=$HOME'/.'$lkFl'.vite.lock';
 
 thisDir=$(realpath "$0" | sed "s/[^/']\+$//");
 launchThis="/bin/sh $thisDir/launchViteApp.sh $repo;";
@@ -25,7 +33,8 @@ echo '# launchViteApp.sub.sh'
 echo '$repo:       '$repo;
 echo '$appName:    '$appName;
 echo '$startCode:  '$startCode;
-echo '$lockFile:      '$lockFile;
+echo '$delay:      '$delay;
+echo '$lockFile:   '$lockFile;
 echo '$thisDir:    '$thisDir;
 echo '$launchThis: '$launchThis;
 
@@ -55,6 +64,19 @@ then 	echo;
 		echo "(NOTE: I've set $lockFile to prevent duplicate servers being started for this application.)";
 		echo;
 
+		if [ $delay -gt 0 ]
+		then	echo;
+			echo '============================================================';
+			echo "We're waiting $delay seconds while other things are done "
+			echo "before starting $appName"
+			sleep $delay
+			echo
+			echo "We're done waiting.";
+			echo '============================================================';
+
+			echo; echo;
+		fi
+
 		/c/Program\ Files/nodejs/npm run dev --host
 
 		rm $lockFile;
@@ -62,6 +84,8 @@ then 	echo;
 		echo; echo;
 		echo "I've removed the lock file ($lockFile) so you can start up next time.";
 		echo; echo;
+
+
 		echo "to restart, just run";
 		echo "	$launchThis";
 		echo;
@@ -69,4 +93,4 @@ then 	echo;
 	fi
 fi
 
-kill -9 $PPID;
+# kill -9 $PPID;

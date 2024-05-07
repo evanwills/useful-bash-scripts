@@ -37,9 +37,23 @@ else 	if [ -d $HOME'/Documents/Evan/code' ]
 	fi
 fi
 
-appName="$1";
-startCode="$2";
-ffProfile="$3";
+# debug 40 '1' "$1";
+# debug 41 '2' "$2";
+# debug 42 '3' "$3";
+# debug 43 '4' "$4";
+# debug 44 '5' "$5";
+
+repo="$1";
+appName="$2";
+startCode="$3";
+sleeper="$4";
+ffProfile="$5";
+
+# debug 52 'repo' "$repo";
+# debug 53 'appName' "$appName";
+# debug 54 'startCode' "$startCode";
+# debug 55 'sleeper' "$sleeper";
+# debug 56 'ffProfile' "$ffProfile";
 
 if [ "$startCode" == 'code' ]
 then	startCode=1;
@@ -49,66 +63,83 @@ else    if [ "$startCode" == '1' ]
 	fi
 fi
 
-if [ -d $appName ]
-then	# $appName is directory
+if [ ! -d "$repo" ]
+then	if [ -d "$appName" ]
+	then	# $appName is directory
 
-	repo=$appName;
-	isWc=$(echo $appName | grep web-component)
-	if [ ! -z $isWc ]
-	then	isWc='wc';
-	else	isWc='';
+		repo=$appName;
+		isWc=$(echo $appName | grep web-component)
+		if [ ! -z $isWc ]
+		then	isWc='wc';
+		else	isWc='';
+		fi
+		appName=$(echo $appName | sed 's/\/$//' | sed 's/^\([^\/]\+\/\)*\([^\/]\+\)$/\2/i')
+	else	if [ ! -d "$repo" ]
+		then	# Is normal $appName
+
+			isWc=$(echo $repo | sed 's/^\(\(wc\|tsf|vue3\)-\)\?.*$/\2/i');
+
+			if [ ! -z "$isWc" ]
+			then 	if [ -z "$appName" ]
+				then	appName=$(echo "$repo" | sed 's/^\(wc\|tsf|vue3\)-\(.*\)$/\2/i');
+				else	if [ "$appName" == "$repo" ]
+					then 	appName=$(echo "$repo" | sed 's/^\(wc\|tsf|vue3\)-\(.*\)$/\2/i');
+					fi
+				fi
+
+				isWc=${$isWc,,};
+			fi
+
+			repo=$(echo $repo | sed 's/\([A-Z]\)/-\1/g')
+			repo=${repo,,};
+			case "$isWc" in
+				'wc')	repo=$_code'/web-components/'$repo'/';
+					;;
+				'tsf')	repo=$HOME'/Documents/TSF-code/'$repo'/';
+					;;
+				'v3')	repo=$HOME'/Documents/Evan/code/family-portal--Vue3--component/'$repo'/';
+					;;
+				*)	repo=$_code'/'$repo'/';
+					;;
+			esac
+		fi
 	fi
-	appName=$(echo $appName | sed 's/\/$//' | sed 's/^\([^\/]\+\/\)*\([^\/]\+\)$/\2/i')
-else	# Is normal $appName
-
-	isWc=$(echo $appName | sed 's/^\(\(wc\|tsf|vue3\)-\)\?.*$/\2/i');
-
-	if [ ! -z "$isWc" ]
-	then 	appName=$(echo "$appName" | sed 's/^\(wc\|tsf|vue3\)-\(.*\)$/\2/i');
-		isWc=${$isWc,,};
-	fi
-
-	repo=$(echo $appName | sed 's/\([A-Z]\)/-\1/g')
-	repo=${repo,,};
-	case "$isWc" in
-		'wc')	repo=$_code'/web-components/'$repo'/';
-			;;
-		'tsf')	repo=$HOME'/Documents/TSF-code/'$repo'/';
-			;;
-		'v3')	repo=$HOME'/Documents/Evan/code/family-portal--Vue3--component/'$repo'/';
-			;;
-		*)	repo=$_code'/'$repo'/';
-			;;
-	esac
 fi
 
+# debug 101 'repo' "$repo";
+# debug 102 'appName' "$appName";
 
 thisDir=$(realpath "$0" | sed "s/[^/']\+$//");
 
-if [ ! -d $repo ]
+if [ ! -d "$repo" ]
 then	echo 'Could not find repo for '$appName
 	echo 'Target directory: '$repo;
 	exit;
 fi
 
-lockFile=$HOME'/.'$appName'.vite.lock';
+lkAppName=$(echo "$appName" | sed 's/[^a-z0-9]\+/-/ig' | sed 's/^-\|-$//g');
+lockFile=$HOME'/.'$lkAppName'.vite.lock';
 
-launchThis="/bin/sh $thisDir/launchViteApp.sh $1;";
+launchThis="/bin/sh $thisDir/launchViteApp.sh '$1' '$2' '$3' '$4';";
 
-# echo;
-# echo '# launchViteApp.sh';
-# debug 113 'repo' "$repo";
-# debug 114 'appName' "$appName";
-# debug 114 'startCode' "$startCode";
-# debug 116 'lockFile' "$lockFile";
+echo;
+echo '# launchViteApp.sh';
+# debug 131 'repo' "$repo";
+# debug 132 'appName' "$appName";
+# debug 133 'startCode' "$startCode";
+# debug 134 'sleeper' "$sleeper";
+# debug 135 'lkAppName' "$lkAppName";
+# debug 135 'lockFile' "$lockFile";
 
 if [ ! -f $lockFile ]
 then	# touch $lockFile
 
 	# Get a deterministic name for the server launch file
 	# App name may not always be populated
-	output="repo:$repo\napp:$appName\nstart:$startCode\nprofile:$ffProfile";
+	output="repo:$repo\napp:$appName\nstart:$startCode\nprofile:$ffProfile\ndelay:$sleeper";
+
 	hash=$(echo $output | md5sum | cut -f1 -d" " | sed 's/^\([a-z0-9]\{8\}\).*$/\1/i');
+	# debug 138 'hash' $hash;
 
 	lk="$HOME/.$hash.vite-serve"
 
@@ -117,7 +148,14 @@ then	# touch $lockFile
 		echo 'repo:'$repo > $lk;
 		echo 'app:'$appName >> $lk;
 		echo 'start:'$startCode >> $lk;
+		echo 'delay:'$sleeper >> $lk;
 		# echo 'profile:'$ffProfile >> $lk;
+
+		echo; echo; echo;
+		echo '==================================================';
+		tail "$lk";
+		echo '==================================================';
+		echo; echo; echo;
 	fi
 
 	# Spawn a new terminal just for the Vite server

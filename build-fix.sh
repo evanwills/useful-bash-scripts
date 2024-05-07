@@ -30,22 +30,25 @@ echo
 
 if [ $rev -eq 1 ]
 then	echo 'Reversing build fix'
-	gitAll='BUILD_FIX_TMP-all.txt';
+	# gitAll='BUILD_FIX_TMP-all.txt';
 	gitChange='BUILD_FIX_TMP-changed.txt';
+	gitUntracked='BUILD_FIX_TMP-untracked.txt';
 
-	git ls-files > "$gitAll";
+	# git ls-files > "$gitAll";
+	git ls-files --others --exclude-standard > "$gitUntracked";
 
 	if [ ! -z "$relPath" ]
 	then	relPath=$(echo "$relPath" | sed 's/\//\\\//g');
 		relPath=$(echo "$relPath" | sed 's/^\(.*\)$/s\/\1\/\//');
 
-		git diff --name-only | sed "$relPath" > "$gitChange";
-	else	git diff --name-only > "$gitChange";
+		git ls-files --modified | sed "$relPath" > "$gitChange";
+	else	git ls-files --modified > "$gitChange";
 	fi
 
 	node $thisDir'build-fix__REV.mjs' "$src";
 
-	rm "$gitAll" "$gitChange";
+	# rm "$gitAll" "$gitChange";
+	rm "$gitChange" "$gitUntracked";
 else	echo 'Fixing build';
 	node $thisDir'build-fix__FWD.mjs' "$src";
 fi
