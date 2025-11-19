@@ -83,35 +83,52 @@ then	s='ies';
 else	s='y';
 fi
 
-echo 'About to push to '$remotes' repositor'$s;
-echo;
-echo;
-
-branch=$(git status | grep 'On branch ' | sed 's/on branch //i');
-
-# Strip leading and trailing white space (if any)
-msg=$(echo $@ | sed 's/^[\r\n\t ]\+|[\r\n\t ]\+$//g');
-
-echo '$msg: '$msg
-
-if [ ! -z "$msg" ]
-then	ticketID=$(branchName2TicketID "$branch");
-
-	msg="$ticketID$msg";
-
-	echo 'Commiting all recent changes';
-	echo
-	echo "git commit -am '$msg'";
-	echo;
-	git commit -am "$msg";
-	echo; echo;
-fi
-
 # -----------------------------------------------
 # @var {string} $branch - The branch currently
 #                         being worked on
 # -----------------------------------------------
 branch=$(git status | grep 'On branch ' | sed 's/on branch //i');
+
+# -----------------------------------------------
+# @var {string} $msg - The commit message to use
+#                      before pushing changes
+# -----------------------------------------------
+# Strip leading and trailing white space (if any)
+msg=$(echo $@ | sed 's/^[\r\n\t ]\+|[\r\n\t ]\+$//g');
+
+
+if [ ! -z "$msg" ]
+then	changeCount=$(git status | grep -c '\(modified\|new file\|renamed\|deleted\):');
+
+	if [ $changeCount -gt 0 ]
+	then	# -----------------------------------------------
+		# @var {string} $ticketID - The ticket ID to prepend to the
+		#                           commit message if the branch
+		#                           matches a pattern known to
+		#                           include ticket IDs
+		# -----------------------------------------------
+		ticketID=$(branchName2TicketID "$branch");
+
+		msg="$ticketID$msg";
+
+		echo 'Commiting all recent changes';
+		echo
+		echo "git commit -am '$msg'";
+		echo;
+		git commit -am "$msg";
+		echo; echo;
+	else	echo 'There are no changes to commit';
+		echo;
+		echo 'Call `gitpush` without any message to confirm you want to';
+		echo 'push previously committed changes.';
+		echo;
+		exit;
+	fi
+fi
+
+echo 'About to push to '$remotes' repositor'$s;
+echo;
+echo;
 
 while [ $remotes -gt 0 ]
 do	# -----------------------------------------------
