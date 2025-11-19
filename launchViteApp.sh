@@ -68,8 +68,15 @@ else	# Is normal $appName
 		isWc=${$isWc,,};
 	fi
 
-	repo=$(echo $appName | sed 's/\([A-Z]\)/-\1/g')
+	double=$(echo "$appName" | grep '\(--\)');
+
+	if [ -z "$double" ]
+	then	repo=$(echo $appName | sed 's/\([A-Z]\)/-\1/g');
+	else	repo=$appName;
+	fi;
+
 	repo=${repo,,};
+
 	case "$isWc" in
 		'wc')	repo=$_code'/web-components/'$repo'/';
 			;;

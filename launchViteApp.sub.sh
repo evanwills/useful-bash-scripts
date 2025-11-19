@@ -10,14 +10,19 @@ fi
 
 echo 'Inside launchViteApp.sub.sh';
 
+deno=$HOME'/.deno/bin/deno.exe';
+npm='"/c/Program Files/nodejs/npm"';
+
 lockFile=$HOME'/.'$appName'.vite.lock';
 
 thisDir=$(realpath "$0" | sed "s/[^/']\+$//");
 launchThis="/bin/sh $thisDir/launchViteApp.sh $repo;";
 
-ffExe='"/c/Program Files/Firefox Developer Edition/firefox.exe"';
-if [ ! -f "$ffExe" ]
-then	ffExe='"/c/Program Files/Mozilla Firefox/firefox.exe"';
+browserExe='"/c/Program Files/Firefox Developer Edition/firefox.exe"';
+if [ ! -f "$browserExe" ]
+then	browserExe='"/c/Program Files/Mozilla Firefox/firefox.exe"';
+elif [ ! -f "$browserExe" ]
+then	browserExe='"/c/Program Files/Google/Chrome/Application/chrome.exe"';
 fi
 
 echo;
@@ -41,8 +46,8 @@ fi
 if [ ! -z "$ffProfile" ]
 then	echo;
 	echo Attempting to start Firefox profile: "'$ffProfile'";
-	echo "\t$ffExe --no-remote -P $ffProfile &"
-	"$ffExe" --no-remote -P $ffProfile &
+	echo "\t$browserExe --no-remote -P $ffProfile &"
+	"$browserExe" --no-remote -P $ffProfile &
 fi
 
 if [ -d $repo ]
@@ -55,7 +60,8 @@ then 	echo;
 		echo "(NOTE: I've set $lockFile to prevent duplicate servers being started for this application.)";
 		echo;
 
-		/c/Program\ Files/nodejs/npm run dev --host
+		$deno task dev
+		# $npm run dev --host
 
 		rm $lockFile;
 
