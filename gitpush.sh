@@ -42,6 +42,34 @@ then	echo 'This directory is not part of a git repository';
 	exit;
 fi
 
+# -----------------------------------------------
+# @function Get a ticket ID from the branch name if possible
+#
+# @param {string} Branch name
+#
+# @return {string} if ticket ID could be found return ticket prefixed
+#                  with "#" and suffixed with space (e.g. "#1234 ").
+#                  Otherwise return empty string
+# -----------------------------------------------
+function branchName2TicketID () {
+	_input="$1";
+	_tmp1=$(echo $_input | sed 's/^\([^/]\+\/\)\+//');
+	_output='';
+
+	if [ "$_input" != "$_tmp1" ]
+	then	_hasID=$(echo "$_tmp1" | grep '^[0-9]\{4,7\}[^/]\+$');
+
+		if [ ! -z "$_hasID" ]
+		then	_tmp2=$(echo "$_hasID" | sed 's/^\([0-9]\+\).*$/\1/');
+
+			if [ "$_hasID" != "$_tmp2" ]
+			then	_output="#$_tmp2 ";
+			fi
+		fi
+	fi
+
+	echo "$_output";
+}
 
 # -----------------------------------------------
 # @var {integer} $remotes - How many remote
@@ -58,6 +86,7 @@ fi
 echo 'About to push to '$remotes' repositor'$s;
 echo;
 echo;
+
 
 if [ ! -z "$2" ]
 then	# Someone's a bozo and forgot to wrap
@@ -95,11 +124,17 @@ then	# Someone's a bozo and forgot to wrap
 else	msg=$(echo $1 | sed 's/[\t ]\+/ /g');
 fi
 
+branch=$(git status | grep 'On branch ' | sed 's/on branch //i');
+
 # Strip leading and trailing white space (if any)
 msg=$(echo $msg | sed 's/^[\r\n\t ]\+|[\r\n\t ]\+$//g');
 
 if [ ! -z "$msg" ]
-then	echo 'Commiting all recent changes';
+then	ticketID=$(branchName2TicketID "$branch");
+
+	msg="$ticketID$msg";
+
+	echo 'Commiting all recent changes';
 	echo
 	echo "git commit -am '$msg'";
 	echo;
@@ -142,6 +177,8 @@ do	# -----------------------------------------------
 	remotes=$(($remotes - 1));
 
 	echo;
+	echo;
+	date '+%Y-%m-%d %H:%M:%S';
 	echo;
 done
 
