@@ -1,5 +1,7 @@
 #!/bin/sh
 
+echo 'launchViteApp.sh';
+
 # ---------------------------------------------------------
 # This is the primary script that launches ViteJS servers
 #
@@ -14,16 +16,25 @@
 # with a deterministic name. Then when a new terminal is
 # launched the first launch file can be called then deleted.
 #
-# The actual launching of the server is done by done by
-# another script (launchViteApp.sub.sh) which is called by
-# the .bashrc file each time a terminal is opened.
+# The actual launching of the server is done by another
+# script (launchViteApp.sub.sh) which is called by the
+# .bashrc file each time a terminal is opened.
 # ---------------------------------------------------------
 
+# ---------------------------------------------------------
+# debug() renders the name of the file, the line debug was called from (passed as the first parameter) the
+#
+# ---------------------------------------------------------
 # debug () {
 # 	echo '----------------------------------------';
 # 	echo "launchViteApp.sh - Line: $1";
-# 	echo "      \$$2: '$3'";
-# 	echo '----------------------------------------';
+# 	if [ ! -z "$2" ]
+# 	then	if [ ! -z "$3" ]
+# 			then	echo "      \$$2: '$3'";
+# 			else	echo "$2";
+# 			fi
+# 			echo '----------------------------------------';
+# 	fi;
 # }
 
 if [ -d $HOME'/Documents/code' ]
@@ -37,23 +48,26 @@ else 	if [ -d $HOME'/Documents/Evan/code' ]
 	fi
 fi
 
-# debug 40 '1' "$1";
-# debug 41 '2' "$2";
-# debug 42 '3' "$3";
-# debug 43 '4' "$4";
-# debug 44 '5' "$5";
+# debug 51 '1' "$1";
+# debug 52 '2' "$2";
+# debug 53 '3' "$3";
+# debug 54 '4' "$4";
+# debug 55 '5' "$5";
+# debug 56 '6' "$6";
 
 repo="$1";
 appName="$2";
 startCode="$3";
 sleeper="$4";
-ffProfile="$5";
+# ffProfile="$5";
+customCmd="$5";
 
-# debug 52 'repo' "$repo";
-# debug 53 'appName' "$appName";
-# debug 54 'startCode' "$startCode";
-# debug 55 'sleeper' "$sleeper";
-# debug 56 'ffProfile' "$ffProfile";
+# debug 65 'repo' "$repo";
+# debug 66 'appName' "$appName";
+# debug 67 'startCode' "$startCode";
+# debug 68 'sleeper' "$sleeper";
+# debug 70 'customCmd' "$customCmd";
+# debug 69 'ffProfile' "$ffProfile";
 
 if [ "$startCode" == 'code' ]
 then	startCode=1;
@@ -106,8 +120,8 @@ then	if [ -d "$appName" ]
 	fi
 fi
 
-# debug 101 'repo' "$repo";
-# debug 102 'appName' "$appName";
+# debug 110 'repo' "$repo";
+# debug 111 'appName' "$appName";
 
 thisDir=$(realpath "$0" | sed "s/[^/']\+$//");
 
@@ -124,22 +138,23 @@ launchThis="/bin/sh $thisDir/launchViteApp.sh '$1' '$2' '$3' '$4';";
 
 echo;
 echo '# launchViteApp.sh';
-# debug 131 'repo' "$repo";
-# debug 132 'appName' "$appName";
-# debug 133 'startCode' "$startCode";
-# debug 134 'sleeper' "$sleeper";
-# debug 135 'lkAppName' "$lkAppName";
-# debug 135 'lockFile' "$lockFile";
+# debug 141 'repo' "$repo";
+# debug 142 'appName' "$appName";
+# debug 143 'startCode' "$startCode";
+# debug 144 'sleeper' "$sleeper";
+# debug 145 'customCmd' "$customCmd";
+# debug 146 'lkAppName' "$lkAppName";
+# debug 147 'lockFile' "$lockFile";
 
 if [ ! -f $lockFile ]
 then	# touch $lockFile
 
 	# Get a deterministic name for the server launch file
 	# App name may not always be populated
-	output="repo:$repo\napp:$appName\nstart:$startCode\nprofile:$ffProfile\ndelay:$sleeper";
+	output="repo:$repo\napp:$appName\nstart:$startCode\nprofile:$ffProfile\ndelay:$sleeper\ncustomCmd:$customCmd";
 
 	hash=$(echo $output | md5sum | cut -f1 -d" " | sed 's/^\([a-z0-9]\{8\}\).*$/\1/i');
-	# debug 138 'hash' $hash;
+	# debug 143 'hash' $hash;
 
 	lk="$HOME/.$hash.vite-serve"
 
@@ -149,6 +164,7 @@ then	# touch $lockFile
 		echo 'app:'$appName >> $lk;
 		echo 'start:'$startCode >> $lk;
 		echo 'delay:'$sleeper >> $lk;
+		echo 'customCmd:'$customCmd >> $lk;
 		# echo 'profile:'$ffProfile >> $lk;
 
 		echo; echo; echo;

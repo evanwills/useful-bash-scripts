@@ -379,8 +379,6 @@ do	echo;
 	read tmpl;
 
 	tmpl=$(getRightTmpl "$tmpl");
-	echo '(Line 360) $tmpl: '$tmpl;
-	echo '(Line 361) $vue2: '$vue2;
 done;
 
 if [ $tmpl == 'vue2' ]
