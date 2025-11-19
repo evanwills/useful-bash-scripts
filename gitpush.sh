@@ -92,13 +92,29 @@ branch=$(git status | grep 'On branch ' | sed 's/on branch //i');
 # -----------------------------------------------
 # @var {string} $msg - The commit message to use
 #                      before pushing changes
+#
+# NOTE: Leading and trailing white spaces are
+#       automatically stripped
 # -----------------------------------------------
-# Strip leading and trailing white space (if any)
 msg=$(echo $@ | sed 's/^[\r\n\t ]\+|[\r\n\t ]\+$//g');
 
+# Make sure there are no conflicts before you commit
+if git status | grep -qE "both modified|Unmerged paths";
+then    echo 'You have unresolved conflicts';
+	echo;
+	echo 'Please resolve the con before committing your changes';
+	echo;
+	exit;
+fi
 
 if [ ! -z "$msg" ]
-then	changeCount=$(git status | grep -c '\(modified\|new file\|renamed\|deleted\):');
+then
+
+	# -----------------------------------------------
+	# @var {number} $changeCount - The number of files to be
+	#                              included in this commit
+	# -----------------------------------------------
+	changeCount=$(git status | grep -c '\(modified\|new file\|renamed\|deleted\):');
 
 	if [ $changeCount -gt 0 ]
 	then	# -----------------------------------------------
