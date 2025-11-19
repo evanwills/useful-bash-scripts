@@ -75,6 +75,8 @@ export const renderCmd = (cmd, list, rawCmd = null) => {
     output += getWholeCmd(_cmd, list);
   }
 
+  console.log('renderCmd() output:', output);
+
   return output;
 };
 
@@ -82,6 +84,7 @@ export const divideFiles = (list, tester, prefix) => {
   const good = [];
   const bad = [];
   const dir = [];
+  console.log('list:', list);
 
   for (let a = 0; a < list.length; a += 1) {
     if (list[a].substring(0, 5) === '[DIR]') {

@@ -42,6 +42,34 @@ then	echo 'This directory is not part of a git repository';
 	exit;
 fi
 
+# -----------------------------------------------
+# @function Get a ticket ID from the branch name if possible
+#
+# @param {string} Branch name
+#
+# @return {string} if ticket ID could be found return ticket prefixed
+#                  with "#" and suffixed with space (e.g. "#1234 ").
+#                  Otherwise return empty string
+# -----------------------------------------------
+function branchName2TicketID () {
+	_input="$1";
+	_tmp1=$(echo $_input | sed 's/^\([^/]\+\/\)\+//');
+	_output='';
+
+	if [ "$_input" != "$_tmp1" ]
+	then	_hasID=$(echo "$_tmp1" | grep '^[0-9]\{4,7\}[^/]\+$');
+
+		if [ ! -z "$_hasID" ]
+		then	_tmp2=$(echo "$_hasID" | sed 's/^\([0-9]\+\).*$/\1/');
+
+			if [ "$_hasID" != "$_tmp2" ]
+			then	_output="#$_tmp2 ";
+			fi
+		fi
+	fi
+
+	echo "$_output";
+}
 
 # -----------------------------------------------
 # @var {integer} $remotes - How many remote
@@ -55,63 +83,68 @@ then	s='ies';
 else	s='y';
 fi
 
-echo 'About to push to '$remotes' repositor'$s;
-echo;
-echo;
-
-if [ ! -z "$2" ]
-then	# Someone's a bozo and forgot to wrap
-	# their comments in quotes.
-	# Let's put it together for them.
-	msg="$1 $2";
-
-	if [ ! -z "$3" ]
-	then	msg="$msg $3";
-
-		if [ ! -z "$4" ]
-		then	msg="$msg $4";
-
-			if [ ! -z "$5" ]
-			then	msg="$msg $5";
-
-				if [ ! -z "$6" ]
-				then	msg="$msg $6";
-
-					if [ ! -z "$7" ]
-					then	msg="$msg $7";
-
-						if [ ! -z "$8" ]
-						then	msg="$msg $8";
-
-							if [ ! -z "$9" ]
-							then	msg="$msg $9";
-							fi
-						fi
-					fi
-				fi
-			fi
-		fi
-	fi
-else	msg=$(echo $1 | sed 's/[\t ]\+/ /g');
-fi
-
-# Strip leading and trailing white space (if any)
-msg=$(echo $msg | sed 's/^[\r\n\t ]\+|[\r\n\t ]\+$//g');
-
-if [ ! -z "$msg" ]
-then	echo 'Commiting all recent changes';
-	echo
-	echo "git commit -am '$msg'";
-	echo;
-	git commit -am "$msg";
-	echo; echo;
-fi
-
 # -----------------------------------------------
 # @var {string} $branch - The branch currently
 #                         being worked on
 # -----------------------------------------------
 branch=$(git status | grep 'On branch ' | sed 's/on branch //i');
+
+# -----------------------------------------------
+# @var {string} $msg - The commit message to use
+#                      before pushing changes
+#
+# NOTE: Leading and trailing white spaces are
+#       automatically stripped
+# -----------------------------------------------
+msg=$(echo $@ | sed 's/^[\r\n\t ]\+|[\r\n\t ]\+$//g');
+
+# Make sure there are no conflicts before you commit
+if git status | grep -qE "both modified|Unmerged paths";
+then    echo 'You have unresolved conflicts';
+	echo;
+	echo 'Please resolve the con before committing your changes';
+	echo;
+	exit;
+fi
+
+if [ ! -z "$msg" ]
+then
+
+	# -----------------------------------------------
+	# @var {number} $changeCount - The number of files to be
+	#                              included in this commit
+	# -----------------------------------------------
+	changeCount=$(git status | grep -c '\(modified\|new file\|renamed\|deleted\):');
+
+	if [ $changeCount -gt 0 ]
+	then	# -----------------------------------------------
+		# @var {string} $ticketID - The ticket ID to prepend to the
+		#                           commit message if the branch
+		#                           matches a pattern known to
+		#                           include ticket IDs
+		# -----------------------------------------------
+		ticketID=$(branchName2TicketID "$branch");
+
+		msg="$ticketID$msg";
+
+		echo 'Commiting all recent changes';
+		echo
+		echo "git commit -am '$msg'";
+		echo;
+		git commit -am "$msg";
+		echo; echo;
+	else	echo 'There are no changes to commit';
+		echo;
+		echo 'Call `gitpush` without any message to confirm you want to';
+		echo 'push previously committed changes.';
+		echo;
+		exit;
+	fi
+fi
+
+echo 'About to push to '$remotes' repositor'$s;
+echo;
+echo;
 
 while [ $remotes -gt 0 ]
 do	# -----------------------------------------------
@@ -142,6 +175,8 @@ do	# -----------------------------------------------
 	remotes=$(($remotes - 1));
 
 	echo;
+	echo;
+	date '+%Y-%m-%d %H:%M:%S';
 	echo;
 done
 
