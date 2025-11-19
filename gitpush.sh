@@ -87,47 +87,12 @@ echo 'About to push to '$remotes' repositor'$s;
 echo;
 echo;
 
-
-if [ ! -z "$2" ]
-then	# Someone's a bozo and forgot to wrap
-	# their comments in quotes.
-	# Let's put it together for them.
-	msg="$1 $2";
-
-	if [ ! -z "$3" ]
-	then	msg="$msg $3";
-
-		if [ ! -z "$4" ]
-		then	msg="$msg $4";
-
-			if [ ! -z "$5" ]
-			then	msg="$msg $5";
-
-				if [ ! -z "$6" ]
-				then	msg="$msg $6";
-
-					if [ ! -z "$7" ]
-					then	msg="$msg $7";
-
-						if [ ! -z "$8" ]
-						then	msg="$msg $8";
-
-							if [ ! -z "$9" ]
-							then	msg="$msg $9";
-							fi
-						fi
-					fi
-				fi
-			fi
-		fi
-	fi
-else	msg=$(echo $1 | sed 's/[\t ]\+/ /g');
-fi
-
 branch=$(git status | grep 'On branch ' | sed 's/on branch //i');
 
 # Strip leading and trailing white space (if any)
-msg=$(echo $msg | sed 's/^[\r\n\t ]\+|[\r\n\t ]\+$//g');
+msg=$(echo $@ | sed 's/^[\r\n\t ]\+|[\r\n\t ]\+$//g');
+
+echo '$msg: '$msg
 
 if [ ! -z "$msg" ]
 then	ticketID=$(branchName2TicketID "$branch");
