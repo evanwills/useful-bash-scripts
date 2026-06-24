@@ -19,12 +19,13 @@
 # the .bashrc file each time a terminal is opened.
 # ---------------------------------------------------------
 
-# debug () {
-# 	echo '----------------------------------------';
-# 	echo "launchViteApp.sh - Line: $1";
-# 	echo "      \$$2: '$3'";
-# 	echo '----------------------------------------';
-# }
+debug () {
+	echo '----------------------------------------';
+	echo "launchViteApp.sh - Line: $1";
+	echo "      \$$2: '$3'";
+	echo '----------------------------------------';
+	echo;
+}
 
 if [ -d $HOME'/Documents/code' ]
 then	_code=$HOME'/Documents/code';
@@ -37,23 +38,26 @@ else 	if [ -d $HOME'/Documents/Evan/code' ]
 	fi
 fi
 
-# debug 40 '1' "$1";
-# debug 41 '2' "$2";
-# debug 42 '3' "$3";
-# debug 43 '4' "$4";
-# debug 44 '5' "$5";
+# debug 41 '1' "$1";
+# debug 42 '2' "$2";
+# debug 43 '3' "$3";
+# debug 44 '4' "$4";
+# debug 45 '5' "$5";
+# debug 46 '6' "$6";
 
 repo="$1";
 appName="$2";
 startCode="$3";
 sleeper="$4";
 ffProfile="$5";
+execCmd="$6";
 
-# debug 52 'repo' "$repo";
-# debug 53 'appName' "$appName";
-# debug 54 'startCode' "$startCode";
-# debug 55 'sleeper' "$sleeper";
-# debug 56 'ffProfile' "$ffProfile";
+# debug 55 'repo' "$repo";
+# debug 56 'appName' "$appName";
+# debug 57 'startCode' "$startCode";
+# debug 58 'sleeper' "$sleeper";
+# debug 59 'ffProfile' "$ffProfile";
+# debug 60 'execCmd' "$execCmd";
 
 if [ "$startCode" == 'code' ]
 then	startCode=1;
@@ -120,46 +124,25 @@ fi
 lkAppName=$(echo "$appName" | sed 's/[^a-z0-9]\+/-/ig' | sed 's/^-\|-$//g');
 lockFile=$HOME'/.'$lkAppName'.vite.lock';
 
-launchThis="/bin/sh $thisDir/launchViteApp.sh '$1' '$2' '$3' '$4';";
+launchThis="/bin/sh $thisDir/launchViteApp.sh '$repo' '$appName' '$startCode' '$sleeper' '$ffProfile' '$execCmd';";
 
 echo;
 echo '# launchViteApp.sh';
-# debug 131 'repo' "$repo";
-# debug 132 'appName' "$appName";
-# debug 133 'startCode' "$startCode";
-# debug 134 'sleeper' "$sleeper";
-# debug 135 'lkAppName' "$lkAppName";
-# debug 135 'lockFile' "$lockFile";
+
+# debug 132 'repo' "$repo";
+# debug 133 'appName' "$appName";
+# debug 134 'startCode' "$startCode";
+# debug 135 'sleeper' "$sleeper";
+# debug 136 'ffProfile' "$ffProfile";
+# debug 137 'execCmd' "$execCmd";
+# debug 138 'lkAppName' "$lkAppName";
+# debug 139 'lockFile' "$lockFile";
 
 if [ ! -f $lockFile ]
-then	# touch $lockFile
-
-	# Get a deterministic name for the server launch file
-	# App name may not always be populated
-	output="repo:$repo\napp:$appName\nstart:$startCode\nprofile:$ffProfile\ndelay:$sleeper";
-
-	hash=$(echo $output | md5sum | cut -f1 -d" " | sed 's/^\([a-z0-9]\{8\}\).*$/\1/i');
-	# debug 138 'hash' $hash;
-
-	lk="$HOME/.$hash.vite-serve"
-
-	if [ ! -f $lk ]
-	then	# Write the launch file
-		echo 'repo:'$repo > $lk;
-		echo 'app:'$appName >> $lk;
-		echo 'start:'$startCode >> $lk;
-		echo 'delay:'$sleeper >> $lk;
-		# echo 'profile:'$ffProfile >> $lk;
-
-		echo; echo; echo;
-		echo '==================================================';
-		tail "$lk";
-		echo '==================================================';
-		echo; echo; echo;
-	fi
-
+then
 	# Spawn a new terminal just for the Vite server
-	start mintty -
+
+	mintty -e bash -lc "$thisDir/launchViteApp.sub.sh '$repo' '$appName' '$startCode' '$sleeper' '$ffProfile' '$execCmd'" &
 
 else	echo;
 	echo "$appName Dev server is already running.";
