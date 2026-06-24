@@ -158,14 +158,14 @@ launchThis="/bin/sh $thisDir/launchViteApp.sh '$repo' '$appName' '$startCode' '$
 echo;
 echo '# launchViteApp.sh';
 
-# debug 132 'repo' "$repo";
-# debug 133 'appName' "$appName";
-# debug 134 'startCode' "$startCode";
-# debug 135 'sleeper' "$sleeper";
-# debug 136 'ffProfile' "$ffProfile";
-# debug 137 'execCmd' "$execCmd";
-# debug 138 'lkAppName' "$lkAppName";
-# debug 139 'lockFile' "$lockFile";
+# debug 161 'repo' "$repo";
+# debug 162 'appName' "$appName";
+# debug 163 'startCode' "$startCode";
+# debug 164 'sleeper' "$sleeper";
+# debug 165 'ffProfile' "$ffProfile";
+# debug 166 'execCmd' "$execCmd";
+# debug 167 'lkAppName' "$lkAppName";
+# debug 168 'lockFile' "$lockFile";
 
 if [ ! -f $lockFile ]
 then
