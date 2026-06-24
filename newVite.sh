@@ -152,51 +152,7 @@ forceEditorconfig () {
 
 	# Make sure there is a .editorconfig file in the application directory
 	if [ ! -f "$_ec" ]
-	then	echo '# .editorconfig helps developers define and maintain consistent coding' > $_ec;
-		echo '# styles between different editors and IDEs' >> $_ec;
-		echo '' >> $_ec;
-		echo '# for more information about the properties used in this file, please see' >> $_ec;
-		echo '# the .editorconfig documentation: http://editorconfig.org/' >> $_ec;
-		echo '' >> $_ec;
-		echo '# this is the top-most .editorconfig file; do not search parent directories' >> $_ec;
-		echo 'root = true' >> $_ec;
-		echo '' >> $_ec;
-		echo '# applied to all files' >> $_ec;
-		echo '[*]' >> $_ec;
-		echo 'indent_style = space' >> $_ec;
-		echo 'indent_size = 2' >> $_ec;
-		echo 'end_of_line = lf' >> $_ec;
-		echo 'charset = utf-8' >> $_ec;
-		echo 'trim_trailing_whitespace = true' >> $_ec;
-		echo 'insert_final_newline = true' >> $_ec;
-		echo '' >> $_ec; echo '' >> $_ec;
-		echo '[*.php]' >> $_ec;
-		echo 'indent_size = 4' >> $_ec;
-		echo '' >> $_ec; echo '' >> $_ec;
-		echo '[*.{html,svg,xhtml,htm}]' >> $_ec;
-		echo 'indent_style = tab' >> $_ec;
-		echo 'insert_final_newline = false' >> $_ec;
-		echo 'indent_size = 4' >> $_ec;
-		echo '' >> $_ec; echo '' >> $_ec;
-		echo '[*.sh]' >> $_ec;
-		echo 'insert_final_newline = false' >> $_ec;
-		echo 'indent_style = tab' >> $_ec;
-		echo 'indent_size = 8' >> $_ec;
-		echo '' >> $_ec; echo '' >> $_ec;
-		echo '[{.bashrc}]' >> $_ec;
-		echo 'insert_final_newline = false' >> $_ec;
-		echo 'indent_style = tab' >> $_ec;
-		echo 'indent_size = 8' >> $_ec;
-		echo '' >> $_ec; echo '' >> $_ec;
-		echo '[*.md]' >> $_ec;
-		echo 'trim_trailing_whitespace = false' >> $_ec;
-		echo '' >> $_ec; echo '' >> $_ec; echo '' >> $_ec;
-		echo '# the indent size used in the `package.json` file cannot be changed' >> $_ec;
-		echo '# https://github.com/npm/npm/pull/3180#issuecomment-16336516' >> $_ec;
-		echo '[{.travis.yml,package.json}]' >> $_ec;
-		echo 'indent_size = 2' >> $_ec;
-		echo 'indent_style = space' >> $_ec;
-		echo '' >> $_ec;
+	then	cp $thisDir/new-vite/.editorconfig "$_ec"
 	fi
 }
 
@@ -205,17 +161,16 @@ forceGitAttributes () {
 
 	# Make sure there is a .gitattributes file in the application directory
 	if [ ! -f "$_ga" ]
-	then	echo '# Make sure line endings (in all text files) are linux style on all systems' > $_ga;
-		echo '* text eol=lf' >> $_ga;
-		echo >> $_ga;
-		echo '# Denote all files that are truly binary and should not be modified.' >> $_ga;
-		echo '*.eot binary' >> $_ga;
-		echo '*.jpg binary' >> $_ga;
-		echo '*.png binary' >> $_ga;
-		echo '*.ttf binary' >> $_ga;
-		echo '*.woff binary' >> $_ga;
-		echo '*.woff2 binary' >> $_ga;
-		echo >> $_ga;
+	then	cp $thisDir/new-vite/.gitattributes "$_ga"
+	fi
+}
+
+forceEslintAirBnB () {
+	_ec=$(pwd)'/.eslintrc.js';
+
+	# Make sure there is a .eslintrc.js file in the application directory
+	if [ ! -f "$_ec" ]
+	then	cp $thisDir/new-vite/.eslintrc.js "$_ec"
 	fi
 }
 
@@ -383,6 +338,19 @@ do	echo;
 	echo '(Line 361) $vue2: '$vue2;
 done;
 
+if [ $tmpl == 'vue' ]
+then	vue2Modules='eslint ';
+	vue2Modules=$vue2Modules'prettier ';
+	vue2Modules=$vue2Modules'globals ';
+	vue2Modules=$vue2Modules'@eslint/js ';
+	vue2Modules=$vue2Modules'eslint-config-airbnb-base ';
+	vue2Modules=$vue2Modules'eslint-config-prettier ';
+	vue2Modules=$vue2Modules'eslint-plugin-import ';
+	vue2Modules=$vue2Modules'eslint-plugin-vue ';
+	vue2Modules=$vue2Modules'eslint-plugin-prettier  ';
+	# vue2Modules=$vue2Modules'@vue/eslint-config-prettier';
+fi
+
 if [ $tmpl == 'vue2' ]
 then	tmpl='vue';
 	vue2Modules='vite-plugin-vue2 @vitejs/plugin-legacy vite-plugin-html vue-template-compiler sass sass-loader';
@@ -492,6 +460,10 @@ then	echo 'About to create a new <'$project'></'$project'> project';
 
 	forceEditorconfig;
 	forceGitAttributes;
+
+	if [ $tmpl === 'vue' ]
+	then	forceEslintAirBnB;
+	fi
 
 	if [ -f README.md ]
 	then	mv README.md README.vite.md

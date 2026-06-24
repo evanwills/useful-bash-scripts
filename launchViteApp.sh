@@ -108,6 +108,35 @@ then	if [ -d "$appName" ]
 			esac
 		fi
 	fi
+	appName=$(echo $appName | sed 's/\/$//' | sed 's/^\([^\/]\+\/\)*\([^\/]\+\)$/\2/i')
+else	# Is normal $appName
+
+	isWc=$(echo $appName | sed 's/^\(\(wc\|tsf|vue3\)-\)\?.*$/\2/i');
+
+	if [ ! -z "$isWc" ]
+	then 	appName=$(echo "$appName" | sed 's/^\(wc\|tsf|vue3\)-\(.*\)$/\2/i');
+		isWc=${$isWc,,};
+	fi
+
+	double=$(echo "$appName" | grep '\(--\)');
+
+	if [ -z "$double" ]
+	then	repo=$(echo $appName | sed 's/\([A-Z]\)/-\1/g');
+	else	repo=$appName;
+	fi;
+
+	repo=${repo,,};
+
+	case "$isWc" in
+		'wc')	repo=$_code'/web-components/'$repo'/';
+			;;
+		'tsf')	repo=$HOME'/Documents/TSF-code/'$repo'/';
+			;;
+		'v3')	repo=$HOME'/Documents/Evan/code/family-portal--Vue3--component/'$repo'/';
+			;;
+		*)	repo=$_code'/'$repo'/';
+			;;
+	esac
 fi
 
 # debug 101 'repo' "$repo";
