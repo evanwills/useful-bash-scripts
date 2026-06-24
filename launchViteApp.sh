@@ -19,12 +19,39 @@
 # the .bashrc file each time a terminal is opened.
 # ---------------------------------------------------------
 
+echo;
+echo '# launchViteApp.sh';
+echo;
+
+# debug 52 '1' "$1";
+# debug 53 '2' "$2";
+# debug 54 '3' "$3";
+# debug 55 '4' "$4";
+# debug 56 '5' "$5";
+# debug 57 '6' "$6";
+
+repo="$1";
+appName="$2";
+startCode="$3";
+sleeper="$4";
+ffProfile="$5";
+execCmd="$6";
+
+noAutoClose=0;
+
 debug () {
 	echo '----------------------------------------';
 	echo "launchViteApp.sh - Line: $1";
-	echo "      \$$2: '$3'";
-	echo '----------------------------------------';
-	echo;
+
+	if [ ! -z "$2" ]
+	then
+		if [ ! -z "$3" ]
+		then	echo "      \$$2: '$3'";
+		else	echo "$2";
+		fi
+		echo '----------------------------------------';
+		echo;
+	fi
 }
 
 if [ -d $HOME'/Documents/code' ]
@@ -38,26 +65,13 @@ else 	if [ -d $HOME'/Documents/Evan/code' ]
 	fi
 fi
 
-# debug 41 '1' "$1";
-# debug 42 '2' "$2";
-# debug 43 '3' "$3";
-# debug 44 '4' "$4";
-# debug 45 '5' "$5";
-# debug 46 '6' "$6";
-
-repo="$1";
-appName="$2";
-startCode="$3";
-sleeper="$4";
-ffProfile="$5";
-execCmd="$6";
-
-# debug 55 'repo' "$repo";
-# debug 56 'appName' "$appName";
-# debug 57 'startCode' "$startCode";
-# debug 58 'sleeper' "$sleeper";
-# debug 59 'ffProfile' "$ffProfile";
-# debug 60 'execCmd' "$execCmd";
+# debug 68 'repo' "$repo";
+# debug 69 'appName' "$appName";
+# debug 70 'startCode' "$startCode";
+# debug 71 'sleeper' "$sleeper";
+# debug 72 'ffProfile' "$ffProfile";
+# debug 73 'execCmd' "$execCmd";
+# debug 74 'noAutoClose' "$noAutoClose";
 
 if [ "$startCode" == 'code' ]
 then	startCode=1;
@@ -109,38 +123,10 @@ then	if [ -d "$appName" ]
 		fi
 	fi
 	appName=$(echo $appName | sed 's/\/$//' | sed 's/^\([^\/]\+\/\)*\([^\/]\+\)$/\2/i')
-else	# Is normal $appName
-
-	isWc=$(echo $appName | sed 's/^\(\(wc\|tsf|vue3\)-\)\?.*$/\2/i');
-
-	if [ ! -z "$isWc" ]
-	then 	appName=$(echo "$appName" | sed 's/^\(wc\|tsf|vue3\)-\(.*\)$/\2/i');
-		isWc=${$isWc,,};
-	fi
-
-	double=$(echo "$appName" | grep '\(--\)');
-
-	if [ -z "$double" ]
-	then	repo=$(echo $appName | sed 's/\([A-Z]\)/-\1/g');
-	else	repo=$appName;
-	fi;
-
-	repo=${repo,,};
-
-	case "$isWc" in
-		'wc')	repo=$_code'/web-components/'$repo'/';
-			;;
-		'tsf')	repo=$HOME'/Documents/TSF-code/'$repo'/';
-			;;
-		'v3')	repo=$HOME'/Documents/Evan/code/family-portal--Vue3--component/'$repo'/';
-			;;
-		*)	repo=$_code'/'$repo'/';
-			;;
-	esac
 fi
 
-# debug 101 'repo' "$repo";
-# debug 102 'appName' "$appName";
+debug 149 'repo' "$repo";
+debug 150 'appName' "$appName";
 
 thisDir=$(realpath "$0" | sed "s/[^/']\+$//");
 
@@ -153,25 +139,24 @@ fi
 lkAppName=$(echo "$appName" | sed 's/[^a-z0-9]\+/-/ig' | sed 's/^-\|-$//g');
 lockFile=$HOME'/.'$lkAppName'.vite.lock';
 
-launchThis="/bin/sh $thisDir/launchViteApp.sh '$repo' '$appName' '$startCode' '$sleeper' '$ffProfile' '$execCmd';";
+launchThis="$thisDir/launchViteApp.sub.sh '$repo' '$appName' '$startCode' '$sleeper' '$ffProfile' '$execCmd';";
 
-echo;
-echo '# launchViteApp.sh';
-
-# debug 161 'repo' "$repo";
-# debug 162 'appName' "$appName";
-# debug 163 'startCode' "$startCode";
-# debug 164 'sleeper' "$sleeper";
-# debug 165 'ffProfile' "$ffProfile";
-# debug 166 'execCmd' "$execCmd";
-# debug 167 'lkAppName' "$lkAppName";
-# debug 168 'lockFile' "$lockFile";
+# debug 143 'startCode' "$startCode";
+# debug 144 'sleeper' "$sleeper";
+# debug 145 'ffProfile' "$ffProfile";
+# debug 146 'execCmd' "$execCmd";
+# debug 147 'lkAppName' "$lkAppName";
+# debug 148 'lockFile' "$lockFile";
+# debug 149 'launchThis' "$launchThis";
 
 if [ ! -f $lockFile ]
 then
 	# Spawn a new terminal just for the Vite server
 
-	mintty -e bash -lc "$thisDir/launchViteApp.sub.sh '$repo' '$appName' '$startCode' '$sleeper' '$ffProfile' '$execCmd'" &
+	if [ "$noAutoClose" == 1 ]
+	then	mintty --hold always -e bash -lc "$launchThis" &
+	else	mintty -e bash -lc "$launchThis" &
+	fi
 
 else	echo;
 	echo "$appName Dev server is already running.";
@@ -180,7 +165,8 @@ else	echo;
 	echo;
 	echo;
 	echo '```';
-	echo "	rm $lockFile; $launchThis";
+	echo "	rm $lockFile;"
+	echo "	/bin/sh $launchThis";
 	echo;
 	echo '```';
 	echo;

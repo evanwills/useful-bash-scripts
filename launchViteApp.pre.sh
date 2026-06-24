@@ -8,24 +8,29 @@
 input="$1";
 
 thisDir=$(realpath "$0" | sed "s/[^/']\+$//");
-launchThis="$thisDir/launchViteApp.sh";
+launchMain="$thisDir/launchViteApp.sh";
 
 debug () {
 	echo '----------------------------------------';
 	echo "launchViteApp.pre.sh - Line: $1";
-	echo "      \$$2: '$3'";
-	echo '----------------------------------------';
-	echo;
-}
 
-debug 37 'input' "$input";
+	if [ ! -z "$2" ]
+	then
+		if [ ! -z "$3" ]
+		then	echo "      \$$2: '$3'";
+		else	echo "$2";
+		fi
+		echo '----------------------------------------';
+		echo;
+	fi
+}
 
 declare -a appParts;
 
 IFS='|' read -r -a appParts <<< "$input";
 
-debug 27 'input' "$input";
-debug 28 'appParts' "${appParts[@]}";
+debug 32 'input' "$input";
+debug 33 'appParts' "${appParts[@]}";
 
 repo="${appParts[0]}";
 label="${appParts[1]}";
@@ -44,17 +49,17 @@ fi
 
 repoLk=$(echo "$label" | sed 's/[^a-z0-9]\+/-/ig' | sed 's/^-|-$//g');
 tmpLock=$HOME'/.'$repoLk'.vite.lock';
-# stayOpen='; echo; read -n 1 -s -r -p \"Press any key to close...\"'
 
-# debug 45 'repoLk' "$repoLk";
-# debug 46 'tmpLock' "$tmpLock";
-# debug 47 'base' "$base";
-# debug 48 'repo' "$repo";
-# debug 49 'label' "$label";
-# debug 50 'code' "$code";
-# debug 51 'profile' "$profile";
-# debug 52 'sleeper' "$sleeper";
-# debug 53 'customCmd' "$customCmd";
+# debug 53 'launchMain' "$launchMain";
+# debug 54 'repoLk' "$repoLk";
+# debug 55 'tmpLock' "$tmpLock";
+# debug 56 'base' "$base";
+# debug 57 'repo' "$repo";
+# debug 58 'label' "$label";
+# debug 59 'code' "$code";
+# debug 60 'profile' "$profile";
+# debug 61 'sleeper' "$sleeper";
+# debug 62 'customCmd' "$customCmd";
 
 if [ -z "$repo" ]
 then
@@ -65,9 +70,9 @@ if [ ! -f "$tmpLock" ]
 then
 	echo "Launching ViteJS:     $repo";
 
-	debug 64 "$launchThis '$repo' '$label' $code $sleeper '$profile' '$customCmd'";
+	debug 75 "$launchMain '$repo' '$label' $code $sleeper '$profile' '$customCmd'";
 
-	$launchThis "$repo" "$label" "$code" "$sleeper" "$profile" "$customCmd";
+	$launchMain "$repo" "$label" "$code" "$sleeper" "$profile" "$customCmd";
 
 else 	echo $a' has alrady started';
 fi

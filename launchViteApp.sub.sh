@@ -10,20 +10,20 @@ execCmd="$6";
 echo;
 echo '# launchViteApp.sub.sh';
 echo;
-echo '$repo:       '$repo;
-echo '$appName:    '$appName;
-echo '$startCode:  '$startCode;
-echo '$delay:      '$delay;
-echo '$ffProfile:  '$ffProfile;
-echo '$execCmd:    '$execCmd;
-echo;
 
 debug () {
 	echo '----------------------------------------';
 	echo "launchViteApp.sub.sh - Line: $1";
-	echo "      \$$2: '$3'";
-	echo '----------------------------------------';
-	echo;
+
+	if [ ! -z "$2" ]
+	then
+		if [ ! -z "$3" ]
+		then	echo "      \$$2: '$3'";
+		else	echo "$2";
+		fi
+		echo '----------------------------------------';
+		echo;
+	fi
 }
 
 if [ -z "$startCode" ]
@@ -40,27 +40,35 @@ fi
 
 echo 'Inside launchViteApp.sub.sh';
 
-deno=$HOME'/.deno/bin/deno.exe';
-npm='"/c/Program Files/nodejs/npm"';
+deno="$HOME/.deno/bin/deno.exe";
 
-lkFl=$(echo "$appName" | sed 's/[^a-z0-9]\+/-/g');
+lkFl=$(echo "$appName" | sed 's/[^a-z0-9]\+/-/ig' | sed 's/^-|-$//g');
 
 lockFile=$HOME'/.'$lkFl'.vite.lock';
 
 thisDir=$(realpath "$0" | sed "s/[^/']\+$//");
 launchThis="/bin/sh $thisDir/launchViteApp.sh '$repo' '$appName' '$startCode' '$delay' '$ffProfile' '$execCmd';";
 
-browserExe='"/c/Program Files/Firefox Developer Edition/firefox.exe"';
+browserExe='/c/Program\ Files/Firefox\ Developer\ Edition/firefox.exe';
 if [ ! -f "$browserExe" ]
-then	browserExe='"/c/Program Files/Mozilla Firefox/firefox.exe"';
+then	browserExe='/c/Program\ Files/Mozilla\ Firefox/firefox.exe';
 elif [ ! -f "$browserExe" ]
-then	browserExe='"/c/Program Files/Google/Chrome/Application/chrome.exe"';
+then	browserExe='/c/Program\ Files/Google/Chrome/Application/chrome.exe';
 fi
 
-# debug 52 '$lockFile' "$lockFile";
-# debug 53 '$thisDir' "$thisDir";
-# debug 54 '$launchThis' "$launchThis";
+# debug 59 'deno' "$deno";
+# debug 60 'lkFl' "$lkFl";
+# debug 61 'lockFile' "$lockFile";
+# debug 62 'thisDir' "$thisDir";
+# debug 63 'launchThis' "$launchThis";
+# debug 64 'browserExe' "$browserExe";
 
+# debug 66 'repo' "$repo";
+# debug 67 'appName' "$appName";
+# debug 68 'startCode' "$startCode";
+# debug 69 'delay' "$delay";
+# debug 70 'ffProfile' "$ffProfile";
+# debug 71 'execCmd' "$execCmd";
 
 # Go to the repo's directory
 cd $repo
@@ -100,19 +108,19 @@ then 	echo;
 			echo; echo;
 		fi
 
-		runner="$npm";
-		dev='npm run dev --host';
-
 		if [ -f "$deno" ]
-		then	runner="$deno";
-			dev="task dev";
-		fi
-
-		if [ ! -z "$execCmd" ]
-		then
-			"$runner"/$execCmd;
-		else
-			"$runner" $dev
+		then	if [ ! -z "$execCmd" ]
+			then
+				"$deno/$execCmd";
+			else
+				"$deno" task dev
+			fi
+		elif [ -d '/c/Program Files/nodejs/' ]
+		then	if [ ! -z "$execCmd" ]
+			then	/c/Program\ Files/nodejs/$execCmd;
+			else	/c/Program\ Files/nodejs/npm run dev
+			fi
+		else	echo 'Deno & NPM not found';
 		fi
 
 		rm "$lockFile";
@@ -128,5 +136,3 @@ then 	echo;
 		echo;
 	fi
 fi
-
-# kill -9 $PPID;
