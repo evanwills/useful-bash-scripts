@@ -23,21 +23,15 @@ echo;
 echo '# launchViteApp.sh';
 echo;
 
-# debug 52 '1' "$1";
-# debug 53 '2' "$2";
-# debug 54 '3' "$3";
-# debug 55 '4' "$4";
-# debug 56 '5' "$5";
-# debug 57 '6' "$6";
-
 repo="$1";
 appName="$2";
 startCode="$3";
-sleeper="$4";
+delay="$4";
 ffProfile="$5";
 execCmd="$6";
+rootRepo="$7";
 
-noAutoClose=0;
+noAutoClose=1;
 
 debug () {
 	echo '----------------------------------------';
@@ -45,7 +39,7 @@ debug () {
 
 	if [ ! -z "$2" ]
 	then
-		if [ ! -z "$3" ]
+		if [[ ! -z "$3" || ! -z "$4" ]]
 		then	echo "      \$$2: '$3'";
 		else	echo "$2";
 		fi
@@ -53,6 +47,14 @@ debug () {
 		echo;
 	fi
 }
+
+# debug 51 '1' "$1";
+# debug 52 '2' "$2" 'force';
+# debug 53 '3' "$3" 'force';
+# debug 54 '4' "$4" 'force';
+# debug 55 '5' "$5" 'force';
+# debug 56 '6' "$6" 'force';
+# debug 57 '7' "$7" 'force';
 
 if [ -d $HOME'/Documents/code' ]
 then	_code=$HOME'/Documents/code';
@@ -65,13 +67,14 @@ else 	if [ -d $HOME'/Documents/Evan/code' ]
 	fi
 fi
 
-# debug 68 'repo' "$repo";
-# debug 69 'appName' "$appName";
-# debug 70 'startCode' "$startCode";
-# debug 71 'sleeper' "$sleeper";
-# debug 72 'ffProfile' "$ffProfile";
-# debug 73 'execCmd' "$execCmd";
-# debug 74 'noAutoClose' "$noAutoClose";
+# debug 70 'repo' "$repo";
+# debug 71 'appName' "$appName";
+# debug 72 'startCode' "$startCode" 'force';
+# debug 73 'delay' "$delay" 'force';
+# debug 74 'ffProfile' "$ffProfile" 'force';
+# debug 75 'execCmd' "$execCmd" 'force';
+# debug 76 'rootRepo' "$rootRepo" 'force';
+# debug 77 'noAutoClose' "$noAutoClose" 'force';
 
 if [ "$startCode" == 'code' ]
 then	startCode=1;
@@ -139,23 +142,24 @@ fi
 lkAppName=$(echo "$appName" | sed 's/[^a-z0-9]\+/-/ig' | sed 's/^-\|-$//g');
 lockFile=$HOME'/.'$lkAppName'.vite.lock';
 
-launchThis="$thisDir/launchViteApp.sub.sh '$repo' '$appName' '$startCode' '$sleeper' '$ffProfile' '$execCmd';";
+launchThis="$thisDir/launchViteApp.sub.sh '$repo' '$appName' '$startCode' '$delay' '$ffProfile' '$execCmd' '$rootRepo'";
 
-# debug 143 'startCode' "$startCode";
-# debug 144 'sleeper' "$sleeper";
-# debug 145 'ffProfile' "$ffProfile";
-# debug 146 'execCmd' "$execCmd";
-# debug 147 'lkAppName' "$lkAppName";
-# debug 148 'lockFile' "$lockFile";
-# debug 149 'launchThis' "$launchThis";
+# debug 147 'startCode' "$startCode" 'force';
+# debug 148 'delay' "$delay" 'force';
+# debug 149 'ffProfile' "$ffProfile" 'force';
+# debug 150 'execCmd' "$execCmd" 'force';
+# debug 151 'rootRepo' "$rootRepo" 'force';
+# debug 152 'lkAppName' "$lkAppName" 'force';
+# debug 153 'lockFile' "$lockFile" 'force';
+# debug 154 'launchThis' "$launchThis" 'force';
 
 if [ ! -f $lockFile ]
 then
 	# Spawn a new terminal just for the Vite server
 
 	if [ "$noAutoClose" == 1 ]
-	then	mintty --hold always -e bash -lc "$launchThis" &
-	else	mintty -e bash -lc "$launchThis" &
+	then	mintty --hold always --title "$appName" -e bash -lc "$launchThis" &
+	else	mintty -e bash --title "$appName" -lc "$launchThis" &
 	fi
 
 else	echo;
