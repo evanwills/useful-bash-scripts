@@ -62,6 +62,8 @@ tmpLock=$HOME'/.'$repoLk'.vite.lock';
 # debug 62 'sleeper' "$sleeper" 'force';
 # debug 63 'customCmd' "$customCmd" 'force';
 # debug 64 'rootRepo' "$rootRepo" 'force';
+# debug 65 'repoLk' "$repoLk" 'force';
+# debug 66 'tmpLock' "$tmpLock" 'force';
 
 if [ -z "$repo" ]
 then
@@ -76,5 +78,5 @@ then
 
 	$launchMain "$repo" "$label" "$code" "$sleeper" "$profile" "$customCmd" "$rootRepo";
 
-else 	echo $a' has alrady started';
+else 	echo $repo' has alrady started';
 fi

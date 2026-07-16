@@ -7,12 +7,22 @@ delay="$4";
 ffProfile="$5";
 execCmd="$6";
 rootRepo="$7";
+doDebug="$8";
 
 echo;
 echo '# launchViteApp.sub.sh';
 echo;
 
+if [ "$doDebug" != '1' ]
+then	doDebug=0;
+# else	set -x;
+fi
+
 debug () {
+	if [ $doDebug -eq 0 ]
+	then	return;
+	fi
+
 	echo '----------------------------------------';
 	echo "launchViteApp.sub.sh - Line: $1";
 
@@ -27,19 +37,18 @@ debug () {
 	fi
 }
 
-# debug 29 '1' "$1" 'force';
-# debug 30 '2' "$2" 'force';
-# debug 31 '3' "$3" 'force';
-# debug 32 '4' "$4" 'force';
-# debug 33 '5' "$5" 'force';
-# debug 34 '6' "$6" 'force';
-# debug 35 '7' "$7" 'force';
+debug 40 '1' "$1" 'force';
+debug 41 '2' "$2" 'force';
+debug 42 '3' "$3" 'force';
+debug 43 '4' "$4" 'force';
+debug 44 '5' "$5" 'force';
+debug 45 '6' "$6" 'force';
+debug 46 '7' "$7" 'force';
+debug 47 '8' "$8" 'force';
 
-startCode=0;
-if [ "$startCode" == 'code' ]
+if [[ "$startCode" == 'code' ||  "$startCode" == '1' ]]
 then	startCode=1;
-elif [ "$startCode" == '1' ]
-then	startCode=1;
+else    startCode=0;
 fi
 
 if [ "$ffProfile" == 'X' ]
@@ -54,40 +63,67 @@ echo 'Inside launchViteApp.sub.sh';
 
 deno="$HOME/.deno/bin/deno.exe";
 
-lkFl=$(echo "$appName" | sed 's/[^a-z0-9]\+/-/ig' | sed 's/^-|-$//g');
+lkFl=$(echo "$appName" | sed 's/[^a-z0-9]\+/-/ig' | sed 's/^-\+\|-\+$//g');
+lkFl=${lkFl,,};
 
 lockFile=$HOME'/.'$lkFl'.vite.lock';
+browserLock='';
 
 thisDir=$(realpath "$0" | sed "s/[^/']\+$//");
 launchThis="/bin/sh $thisDir/launchViteApp.sh '$repo' '$appName' '$startCode' '$delay' '$ffProfile' '$execCmd';";
 
-chrome='/c/Program\ Files/Google/Chrome/Application/chrome.exe';
-ff='/c/Program\ Files/Mozilla\ Firefox/firefox.exe';
-ffDev='/c/Program\ Files/Firefox\ Developer\ Edition/firefox.exe';
-edge="/c/Program\ Files\ \(x86\)/Microsoft/Edge/Application/msedge.exe"
+chrome='/c/Program Files/Google/Chrome/Application/chrome.exe';
+ff='/c/Program Files/Mozilla Firefox/firefox.exe';
+ffDev='/c/Program Files/Mozilla Firefox Developer Edition/firefox.exe';
+edge="/c/Program Files (x86)/Microsoft/Edge/Application/msedge.exe";
 
+debug 79 'deno' "$deno";
+debug 80 'chrome' "$chrome";
+debug 81 'ff' "$ff";
+debug 82 'ffDev' "$ffDev";
+debug 83 'edge' "$edge";
+debug 84 'lkFl' "$lkFl";
+debug 85 'lockFile' "$lockFile";
+debug 86 'thisDir' "$thisDir";
+debug 87 'launchThis' "$launchThis";
+debug 88 'browserExe' "$browserExe";
 
-# debug 68 'deno' "$deno";
-# debug 69 'chrome' "$chrome";
-# debug 70 'ff' "$ff";
-# debug 71 'ffDev' "$ffDev";
-# debug 72 'edge' "$edge";
-# debug 73 'lkFl' "$lkFl";
-# debug 74 'lockFile' "$lockFile";
-# debug 75 'thisDir' "$thisDir";
-# debug 76 'launchThis' "$launchThis";
-# debug 77 'browserExe' "$browserExe";
+debug 90 'repo' "$repo";
+debug 91 'appName' "$appName" 'force';
+debug 92 'startCode' "$startCode" 'force';
+debug 93 'delay' "$delay" 'force';
+debug 94 'ffProfile' "$ffProfile" 'force';
+debug 95 'execCmd' "$execCmd" 'force';
+debug 96 'rootRepo' "$rootRepo" 'force';
+debug 97 'doDebug' "$doDebug" 'force';
 
-# debug 79 'repo' "$repo";
-# debug 80 'appName' "$appName" 'force';
-# debug 81 'startCode' "$startCode" 'force';
-# debug 82 'delay' "$delay" 'force';
-# debug 83 'ffProfile' "$ffProfile" 'force';
-# debug 84 'execCmd' "$execCmd" 'force';
+# sleep 60;
 # exit;
 
-# Go to the repo's directory
+if [ -z "$repo" ]
+then	echo;
+	echo "No repo was specified.";
+	echo;
+	sleep 60
+	exit;
+elif [ ! -d "$repo" ]
+then	echo;
+	echo "The repo ($repo) does not exist.";
+	echo;
+	sleep 60
+	exit;
+fi
+
+echo;
+echo "Go to the repo's directory:"
+echo "	$repo";
 cd $repo
+
+echo "Should be in the repo's directory:"
+echo "	$repo";
+echo "Current directory:"
+echo "	$(pwd)";
+echo;
 
 if [ $startCode -eq 1 ]
 then	if [ -d "$rootRepo" ]
@@ -100,80 +136,100 @@ fi
 
 if [ ! -z "$ffProfile" ]
 then	browserExe='';
+	browserKey='';
 
 	if [ -f "$ffDev" ]
 	then	browserExe="$ffDev";
+		browserKey='ff-dev';
+		browserName='Firefox Developer Edition';
 	elif [ -f "$ff" ]
 	then	browserExe="$ff";
+		browserKey='ff';
+		browserName='Firefox';
 	elif [ -f "$chrome" ]
 	then	browserExe="$chrome";
+		browserKey='chrome';
+		browserName='Google Chrome';
 	elif [ -f "$edge" ]
 	then	browserExe="$edge";
+		browserKey='edge';
+		browserName='Microsoft Edge';
 	fi
 
-	# debug 97 'browserExe' "$browserExe";
+	browserLock=$HOME'/.'$browserKey'--'$ffProfile'.lock';
+	# debug 158 'browserExe' "$browserExe";
+	debug 159 'browserLock' "$browserLock";
 
 	if [ ! -z "$browserExe" ]
 	then	echo;
-		echo Attempting to start Firefox profile: "'$ffProfile'";
-		echo "\t$browserExe -P $ffProfile &"
-		"$browserExe" -P $ffProfile &
+		if [ ! -f "$browserLock" ]
+		then	touch "$browserLock";
+			echo "Attempting to start $browserName profile: '$ffProfile'";
+			echo "\t$browserExe --no-remote -P $ffProfile &"
+
+			"$browserExe" --no-remote -P "$ffProfile" &
+		else
+			echo;
+			echo "A $browserName instance of '$ffProfile' is already running.";
+		fi
 	else	echo 'Could not find browser executable.';
-		# debug 115 'ffDev' "$ffDev";
-		# debug 116 'ff' "$ff";
-		# debug 117 'chrome' "$chrome";
-		# debug 118 'edge' "$edge";
+		debug 174 'ffDev' "$ffDev";
+		debug 175 'ff' "$ff";
+		debug 176 'chrome' "$chrome";
+		debug 177 'edge' "$edge";
 	fi
+else 	echo;
+	echo "No Firefox profile was specified.";
+	echo 'Skipping attempt to start Firefox.';
+	debug 150 'ffProfile' "$ffProfile";
 fi
 
-if [ -d $repo ]
-then 	echo;
+if [ ! -f "$lockFile" ]
+then	touch "$lockFile";
+	echo 'About to start '$appName'.';
+	echo;
+	echo "(NOTE: I've set $lockFile to prevent duplicate servers being started for this application.)";
+	echo;
 
-	if [ ! -f "$lockFile" ]
-	then	touch "$lockFile";
-		echo 'About to start '$appName'.';
-		echo;
-		echo "(NOTE: I've set $lockFile to prevent duplicate servers being started for this application.)";
-		echo;
-
-		if [ $delay -gt 0 ]
-		then	echo;
-			echo '============================================================';
-			echo "We're waiting $delay seconds while other things are done "
-			echo "before starting $appName"
-			sleep $delay
-			echo
-			echo "We're done waiting.";
-			echo '============================================================';
-
-			echo; echo;
-		fi
-
-		if [ -f "$deno" ]
-		then	if [ ! -z "$execCmd" ]
-			then
-				"$deno/$execCmd";
-			else
-				"$deno" task dev
-			fi
-		elif [ -d '/c/Program Files/nodejs/' ]
-		then	if [ ! -z "$execCmd" ]
-			then	/c/Program\ Files/nodejs/$execCmd;
-			else	/c/Program\ Files/nodejs/npm run dev
-			fi
-		else	echo 'Deno & NPM not found';
-		fi
-
-		rm "$lockFile";
+	if [ $delay -gt 0 ]
+	then	echo;
+		echo '============================================================';
+		echo "We're waiting $delay seconds while other things are done "
+		echo "before starting $appName"
+		sleep $delay
+		echo
+		echo "We're done waiting.";
+		echo '============================================================';
 
 		echo; echo;
-		echo "I've removed the lock file ($lockFile) so you can start up next time.";
-		echo; echo;
-
-
-		echo "to restart, just run";
-		echo "	$launchThis";
-		echo;
-		echo;
 	fi
+
+	if [ -f "$deno" ]
+	then	if [ ! -z "$execCmd" ]
+		then
+			"$deno/$execCmd";
+		else
+			"$deno" task dev
+		fi
+	elif [ -d '/c/Program Files/nodejs/' ]
+	then	if [ ! -z "$execCmd" ]
+		then	echo "Running custom command: /c/Program\ Files/nodejs/$execCmd";
+			/c/Program\ Files/nodejs/$execCmd;
+		else	echo "Running default command: /c/Program\ Files/nodejs/npm run dev";
+			/c/Program\ Files/nodejs/npm run dev
+		fi
+	else	echo 'Could not find Node or Deno!';
+	fi
+
+	rm "$lockFile";
+
+	echo; echo;
+	echo "I've removed the lock file ($lockFile) so you can start up next time.";
+	echo; echo;
+
+
+	echo "to restart, just run";
+	echo "	$launchThis";
+	echo;
+	echo;
 fi

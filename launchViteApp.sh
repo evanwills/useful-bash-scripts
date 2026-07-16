@@ -33,7 +33,15 @@ rootRepo="$7";
 
 noAutoClose=1;
 
+# if [ "$noAutoClose" == '1' ]
+# then	set -x;
+# fi
+
 debug () {
+	if [ $noAutoClose -eq 0 ]
+	then	return;
+	fi
+
 	echo '----------------------------------------';
 	echo "launchViteApp.sh - Line: $1";
 
@@ -48,13 +56,13 @@ debug () {
 	fi
 }
 
-# debug 51 '1' "$1";
-# debug 52 '2' "$2" 'force';
-# debug 53 '3' "$3" 'force';
-# debug 54 '4' "$4" 'force';
-# debug 55 '5' "$5" 'force';
-# debug 56 '6' "$6" 'force';
-# debug 57 '7' "$7" 'force';
+debug 59 '1' "$1";
+debug 60 '2' "$2" 'force';
+debug 61 '3' "$3" 'force';
+debug 62 '4' "$4" 'force';
+debug 63 '5' "$5" 'force';
+debug 64 '6' "$6" 'force';
+debug 65 '7' "$7" 'force';
 
 if [ -d $HOME'/Documents/code' ]
 then	_code=$HOME'/Documents/code';
@@ -67,23 +75,20 @@ else 	if [ -d $HOME'/Documents/Evan/code' ]
 	fi
 fi
 
-# debug 70 'repo' "$repo";
-# debug 71 'appName' "$appName";
-# debug 72 'startCode' "$startCode" 'force';
-# debug 73 'delay' "$delay" 'force';
-# debug 74 'ffProfile' "$ffProfile" 'force';
-# debug 75 'execCmd' "$execCmd" 'force';
-# debug 76 'rootRepo' "$rootRepo" 'force';
-# debug 77 'noAutoClose' "$noAutoClose" 'force';
+debug 78 'repo' "$repo";
+debug 79 'appName' "$appName";
+debug 80 'startCode' "$startCode" 'force';
+debug 81 'delay' "$delay" 'force';
+debug 82 'ffProfile' "$ffProfile" 'force';
+debug 83 'execCmd' "$execCmd" 'force';
+debug 84 'rootRepo' "$rootRepo" 'force';
+debug 85 'noAutoClose' "$noAutoClose" 'force';
 
-if [ "$startCode" == 'code' ]
+if [[ "$startCode" == 'code' || "$startCode" == '1' ]]
 then	startCode=1;
-else    if [ "$startCode" == '1' ]
-	then	startCode=1;
-	else    startCode=0;
-	fi
+else    startCode=0;
 fi
-
+debug 83 'startCode' "$startCode" 'force';
 if [ ! -d "$repo" ]
 then	if [ -d "$appName" ]
 	then	# $appName is directory
@@ -128,8 +133,8 @@ then	if [ -d "$appName" ]
 	appName=$(echo $appName | sed 's/\/$//' | sed 's/^\([^\/]\+\/\)*\([^\/]\+\)$/\2/i')
 fi
 
-debug 149 'repo' "$repo";
-debug 150 'appName' "$appName";
+# debug 149 'repo' "$repo";
+# debug 150 'appName' "$appName";
 
 thisDir=$(realpath "$0" | sed "s/[^/']\+$//");
 
@@ -142,18 +147,19 @@ fi
 lkAppName=$(echo "$appName" | sed 's/[^a-z0-9]\+/-/ig' | sed 's/^-\|-$//g');
 lockFile=$HOME'/.'$lkAppName'.vite.lock';
 
-launchThis="$thisDir/launchViteApp.sub.sh '$repo' '$appName' '$startCode' '$delay' '$ffProfile' '$execCmd' '$rootRepo'";
+launchThis="$thisDir/launchViteApp.sub.sh '$repo' '$appName' '$startCode' '$delay' '$ffProfile' '$execCmd' '$rootRepo' $noAutoClose";
 
-# debug 147 'startCode' "$startCode" 'force';
-# debug 148 'delay' "$delay" 'force';
-# debug 149 'ffProfile' "$ffProfile" 'force';
-# debug 150 'execCmd' "$execCmd" 'force';
-# debug 151 'rootRepo' "$rootRepo" 'force';
-# debug 152 'lkAppName' "$lkAppName" 'force';
-# debug 153 'lockFile' "$lockFile" 'force';
-# debug 154 'launchThis' "$launchThis" 'force';
+debug 152 'startCode' "$startCode" 'force';
+debug 153 'delay' "$delay" 'force';
+debug 154 'ffProfile' "$ffProfile" 'force';
+debug 155 'execCmd' "$execCmd" 'force';
+debug 156 'rootRepo' "$rootRepo" 'force';
+debug 158 'noAutoClose' "$noAutoClose" 'force';
+debug 157 'lkAppName' "$lkAppName" 'force';
+debug 158 'lockFile' "$lockFile" 'force';
+debug 159 'launchThis' "$launchThis" 'force';
 
-if [ ! -f $lockFile ]
+if [ ! -f "$lockFile" ]
 then
 	# Spawn a new terminal just for the Vite server
 
