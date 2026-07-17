@@ -8,6 +8,7 @@ ffProfile="$5";
 execCmd="$6";
 rootRepo="$7";
 doDebug="$8";
+thisDir=$(realpath "$0" | sed "s/[^/']\+$//");
 
 echo;
 echo '# launchViteApp.sub.sh';
@@ -19,7 +20,7 @@ then	doDebug=0;
 fi
 
 debug () {
-	if [ $doDebug -eq 0 ]
+	if [ $doDebug -neq 1 ]
 	then	return;
 	fi
 
@@ -72,30 +73,21 @@ browserLock='';
 thisDir=$(realpath "$0" | sed "s/[^/']\+$//");
 launchThis="/bin/sh $thisDir/launchViteApp.sh '$repo' '$appName' '$startCode' '$delay' '$ffProfile' '$execCmd';";
 
-chrome='/c/Program Files/Google/Chrome/Application/chrome.exe';
-ff='/c/Program Files/Mozilla Firefox/firefox.exe';
-ffDev='/c/Program Files/Mozilla Firefox Developer Edition/firefox.exe';
-edge="/c/Program Files (x86)/Microsoft/Edge/Application/msedge.exe";
+debug 76 'deno' "$deno";
+debug 77 'lkFl' "$lkFl";
+debug 78 'lockFile' "$lockFile";
+debug 79 'thisDir' "$thisDir";
+debug 80 'launchThis' "$launchThis";
+debug 81 'browserExe' "$browserExe";
 
-debug 79 'deno' "$deno";
-debug 80 'chrome' "$chrome";
-debug 81 'ff' "$ff";
-debug 82 'ffDev' "$ffDev";
-debug 83 'edge' "$edge";
-debug 84 'lkFl' "$lkFl";
-debug 85 'lockFile' "$lockFile";
-debug 86 'thisDir' "$thisDir";
-debug 87 'launchThis' "$launchThis";
-debug 88 'browserExe' "$browserExe";
-
-debug 90 'repo' "$repo";
-debug 91 'appName' "$appName" 'force';
-debug 92 'startCode' "$startCode" 'force';
-debug 93 'delay' "$delay" 'force';
-debug 94 'ffProfile' "$ffProfile" 'force';
-debug 95 'execCmd' "$execCmd" 'force';
-debug 96 'rootRepo' "$rootRepo" 'force';
-debug 97 'doDebug' "$doDebug" 'force';
+debug 83 'repo' "$repo";
+debug 84 'appName' "$appName" 'force';
+debug 85 'startCode' "$startCode" 'force';
+debug 86 'delay' "$delay" 'force';
+debug 87 'ffProfile' "$ffProfile" 'force';
+debug 88 'execCmd' "$execCmd" 'force';
+debug 89 'rootRepo' "$rootRepo" 'force';
+debug 90 'doDebug' "$doDebug" 'force';
 
 # sleep 60;
 # exit;
@@ -135,53 +127,11 @@ then	if [ -d "$rootRepo" ]
 fi
 
 if [ ! -z "$ffProfile" ]
-then	browserExe='';
-	browserKey='';
-
-	if [ -f "$ffDev" ]
-	then	browserExe="$ffDev";
-		browserKey='ff-dev';
-		browserName='Firefox Developer Edition';
-	elif [ -f "$ff" ]
-	then	browserExe="$ff";
-		browserKey='ff';
-		browserName='Firefox';
-	elif [ -f "$chrome" ]
-	then	browserExe="$chrome";
-		browserKey='chrome';
-		browserName='Google Chrome';
-	elif [ -f "$edge" ]
-	then	browserExe="$edge";
-		browserKey='edge';
-		browserName='Microsoft Edge';
-	fi
-
-	browserLock=$HOME'/.'$browserKey'--'$ffProfile'.lock';
-	# debug 158 'browserExe' "$browserExe";
-	debug 159 'browserLock' "$browserLock";
-
-	if [ ! -z "$browserExe" ]
-	then	echo;
-		if [ ! -f "$browserLock" ]
-		then	touch "$browserLock";
-			echo "Attempting to start $browserName profile: '$ffProfile'";
-			echo "\t$browserExe --no-remote -P $ffProfile &"
-
-			"$browserExe" --no-remote -P "$ffProfile" &
-		else
-			echo;
-			echo "A $browserName instance of '$ffProfile' is already running.";
-		fi
-	else	echo 'Could not find browser executable.';
-		debug 174 'ffDev' "$ffDev";
-		debug 175 'ff' "$ff";
-		debug 176 'chrome' "$chrome";
-		debug 177 'edge' "$edge";
-	fi
+then	$thisDir/launchBrowser.sh "$ffProfile" &
 else 	echo;
 	echo "No Firefox profile was specified.";
 	echo 'Skipping attempt to start Firefox.';
-	debug 150 'ffProfile' "$ffProfile";
+	debug 134 'ffProfile' "$ffProfile";
 fi
 
 if [ ! -f "$lockFile" ]
