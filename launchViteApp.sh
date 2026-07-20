@@ -38,7 +38,7 @@ noAutoClose=1;
 # fi
 
 debug () {
-	if [ $noAutoClose -eq 0 ]
+	if [ $noAutoClose -ne 1 ]
 	then	return;
 	fi
 

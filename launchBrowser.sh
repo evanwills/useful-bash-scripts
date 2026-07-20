@@ -1,4 +1,6 @@
-profile=$(echo $1 | sed 's/^([^|]*\)|.*$/\1/');
+echo 'Attempting to launch browser profile';
+
+profile=$(echo $1 | sed 's/^\([^|]*\)|.*$/\1/');
 
 if [ -z "$profile" ]
 then	echo
@@ -17,8 +19,10 @@ browserKey='';
 ff=1;
 doDebug=1;
 
+# =========================================================
+
 debug () {
-	if [ $doDebug -neq 1 ]
+	if [ $doDebug -ne 1 ]
 	then	return;
 	fi
 
@@ -36,6 +40,9 @@ debug () {
 	fi
 }
 
+# =========================================================
+
+debug 45 'profile' "$profile";
 
 if [ -f "$ffDev" ]
 then	browserExe="$ffDev";
@@ -59,16 +66,16 @@ fi
 
 if [ -z "$browserExe" ]
 then	echo 'Could not find browser executable.';
-	debug 62 'ffDev' "$ffDev";
-	debug 63 'ff' "$ff";
-	debug 64 'chrome' "$chrome";
-	debug 65 'edge' "$edge";
+	debug 69 'ffDev' "$ffDev";
+	debug 70 'ff' "$ff";
+	debug 71 'chrome' "$chrome";
+	debug 72 'edge' "$edge";
 	exit;
 fi
 
 browserLock=$HOME'/.'$browserKey'--'$ffProfile'.lock';
-# debug 69 'browserExe' "$browserExe";
-debug 70 'browserLock' "$browserLock";
+# debug 77 'browserExe' "$browserExe";
+debug 78 'browserLock' "$browserLock";
 
 if [ ! -f "$browserLock" ]
 then	touch "$browserLock";

@@ -20,7 +20,7 @@ then	doDebug=0;
 fi
 
 debug () {
-	if [ $doDebug -neq 1 ]
+	if [ $doDebug -ne 1 ]
 	then	return;
 	fi
 
