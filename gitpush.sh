@@ -129,7 +129,9 @@ then
 
 		echo 'Commiting all recent changes';
 		echo;
-		echo "$ git commit -am '$msg'";
+		git status | grep '\(modified\|new file\|renamed\|deleted\):';
+		echo;
+		echo "$ git commit -am '$msg';";
 		echo;
 		git commit -am "$msg";
 		echo;
