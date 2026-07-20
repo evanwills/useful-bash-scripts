@@ -128,11 +128,18 @@ then
 		msg="$ticketID$msg";
 
 		echo 'Commiting all recent changes';
-		echo
-		echo "git commit -am '$msg'";
+		echo;
+		echo "$ git commit -am '$msg'";
 		echo;
 		git commit -am "$msg";
-		echo; echo;
+		echo;
+		echo '- - - - - - - - - - - - - - - - - - - - - -';
+		echo;
+		git log -n 1;
+		echo;
+		echo '- - - - - - - - - - - - - - - - - - - - - -';
+		echo;
+		echo;
 	else	echo 'There are no changes to commit';
 		echo;
 		echo 'Call `gitpush` without any message to confirm you want to';
@@ -179,7 +186,3 @@ do	# -----------------------------------------------
 	date '+%Y-%m-%d %H:%M:%S';
 	echo;
 done
-
-echo;
-git log -n 1;
-echo;
