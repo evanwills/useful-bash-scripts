@@ -23,8 +23,8 @@
 # Updated: 2022-02-04
 # ---------------------------------------------------------
 
-
-echo; echo;
+echo;
+# echo;
 
 # -----------------------------------------------
 # @var {string} $noGit - Whether or not the
@@ -35,9 +35,11 @@ echo; echo;
 noGit=$(git remote -v | grep fatal);
 
 if [ ! -z $noGit ]
-then	echo 'This directory is not part of a git repository';
+then	echo;
+	echo 'This directory is not part of a git repository';
 	echo 'so there is nothing to push';
-	echo; echo;
+	echo;
+	echo;
 
 	exit;
 fi
@@ -127,11 +129,11 @@ then
 
 		msg="$ticketID$msg";
 
-		echo 'Commiting all recent changes';
+		echo 'Committing and pushing the following files';
+		# echo;
+		# echo "$ git commit -am '$msg';";
 		echo;
 		git status | grep '\(modified\|new file\|renamed\|deleted\):';
-		echo;
-		echo "$ git commit -am '$msg';";
 		echo;
 		git commit -am "$msg";
 		echo;
