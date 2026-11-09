@@ -1,3 +1,5 @@
+#!/bin/sh
+
 echo 'Attempting to launch browser profile';
 
 profile=$(echo $1 | sed 's/^\([^|]*\)|.*$/\1/');
@@ -9,9 +11,9 @@ then	echo
 	exit;
 fi
 
-chrome='/c/Program Files/Google/Chrome/Application/chrome.exe';
-ff='/c/Program Files/Mozilla Firefox/firefox.exe';
 ffDev='/c/Program Files/Mozilla Firefox Developer Edition/firefox.exe';
+ff='/c/Program Files/Mozilla Firefox/firefox.exe';
+chrome='/c/Program Files/Google/Chrome/Application/chrome.exe';
 edge="/c/Program Files (x86)/Microsoft/Edge/Application/msedge.exe";
 
 browserExe='';
@@ -87,7 +89,7 @@ then	touch "$browserLock";
 
 		"$browserExe" --no-remote -P "$ffProfile" &
 	else	echo;
-		"$browserExe" &;
+		"$browserExe" &
 	fi
 else
 	echo;
